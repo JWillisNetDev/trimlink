@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project>
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <!-- Include EntityFrameworkCore in all projects -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.5" />
+    </ItemGroup>
+
+    <!-- Include the 'trimlink.data' project in all projects (and not itself) -->
+    <!--
+    <ItemGroup>
+        <ProjectReference Include="..\trimlink.data\trimlink.data.csproj" Condition="'$(MSBuildThisFileFullPath)' != '$(MSBuildProjectFullPath)'">
+            <Name>Trimlink Data</Name>
+            <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
+        </ProjectReference>
+    </ItemGroup>
+    -->
+</Project>

@@ -1,14 +1,14 @@
 ﻿using AutoMapper;
-using trimlink.api.Contracts;
+using trimlink.website.Contracts;
 using trimlink.data.Models;
 
-namespace trimlink.api.Configuration;
+namespace trimlink.website.Configuration;
 
 public class MappingProfile : Profile
 {
     public MappingProfile()
     {
         CreateMap<LinkCreate, Link>();
-
+        CreateMap<Link, LinkGet>();
     }
 }

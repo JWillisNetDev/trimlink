@@ -1,7 +1,11 @@
 ﻿using trimlink.data;
-using trimlink.api.Configuration;
+using trimlink.website.Configuration;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using shortid;
+using trimlink.data.Repositories;
+using trimlink.core.Services;
+using trimlink.website;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,24 +23,31 @@ builder.Services.AddAutoMapper(config =>
     config.AddProfile<MappingProfile>();
 });
 
-// Inject our database DB context
-builder.Services.AddDbContextFactory<TrimLinkDbContext>(options =>
+// Inject our UnitOfWork abstraction
+//builder.Services.AddScoped<IUnitOfWork, UnitOfWork>(services =>
+//{
+//    DbContextOptionsBuilder<TrimLinkDbContext> optionsBuilder = new();
+//    if (builder.Environment.IsDevelopment())
+//    {
+//        optionsBuilder.UseInMemoryDatabase("trimlink-devdb");
+//    }
+//    TrimLinkDbContext context = new TrimLinkDbContext(options: optionsBuilder.Options);
+//    return new UnitOfWork(context);
+//});
+
+builder.Services.AddSingleton<ILinkService, LinkService>(sp =>
 {
+    DbContextOptionsBuilder<TrimLinkDbContext> optionsBuilder = new();
     if (builder.Environment.IsDevelopment())
     {
-        options.UseInMemoryDatabase("trimlink-devdb");
+        optionsBuilder.UseInMemoryDatabase("trimlink-devdb");
     }
-    // TODO Create production database
-});
 
-// Add our static page content
-builder.Services.AddSpaStaticFiles(options =>
-{
-    options.RootPath = "wwwroot";
+    UnitOfWorkFactory factory = new(optionsBuilder.Options);
+    return new LinkService(factory);
 });
 
 // TODO Add Authentication using jwt bearer authentication schema
-
 
 // Configure CORS to accept cross-origin requests from Vue frontend
 builder.Services.AddCors(options =>
@@ -63,19 +74,14 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("FrontendCorsPolicy");
 
+app.UseStaticFiles();
+
+app.MapFallbackToFile("index.html");
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.UseSpaStaticFiles();
-app.UseSpa(bldr =>
-{
-    if (app.Environment.IsDevelopment())
-    {
-        bldr.UseProxyToSpaDevelopmentServer("http://localhost:8080");
-    }
-});
 
 app.Run();
