@@ -3,32 +3,46 @@ using trimlink.data;
 using trimlink.data.Models;
 using trimlink.data.Repositories;
 using shortid;
+using Microsoft.EntityFrameworkCore;
 
 namespace trimlink.core.Services;
 
 public class LinkService : ILinkService
 {
-    private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+    private static Link CreateLink(string toUrl, bool isNeverExpires, TimeSpan expiresAfter)
+    {
+        string shortId = ShortId.Generate();
+        DateTime now = DateTime.UtcNow;
+        Link link = new Link()
+        {
+            RedirectToUrl = toUrl,
+            ShortId = shortId,
+            IsMarkedForDeletion = false,
+            UtcDateCreated = now,
+            IsNeverExpires = isNeverExpires,
+            UtcDateExpires = isNeverExpires ? DateTime.MaxValue : now + expiresAfter,
+        };
+        return link;
+    }
 
-    [SetsRequiredMembers]
+    private static Link CreateLink(string toUrl)
+        => CreateLink(toUrl, true, TimeSpan.Zero);
+
     public LinkService(IUnitOfWorkFactory unitOfWorkFactory)
     {
         _unitOfWorkFactory = unitOfWorkFactory;
     }
 
+    private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+
+    private IUnitOfWork CreateUnitOfWork() => _unitOfWorkFactory.CreateUnitOfWork();
+
     public string GenerateShortLink(string toUrl, out int id)
     {
         ArgumentNullException.ThrowIfNull(toUrl, nameof(toUrl));
-        using UnitOfWork unitOfWork = _unitOfWorkFactory.CreateUnitOfWork();
+        using IUnitOfWork unitOfWork = CreateUnitOfWork();
 
-        Link link = new Link
-        {
-            RedirectToUrl = toUrl,
-            UtcDateCreated = DateTime.UtcNow,
-            UtcDateExpires = DateTime.MaxValue,
-            IsNeverExpires = true,
-            ShortId = ShortId.Generate(),
-        };
+        Link link = CreateLink(toUrl, true, TimeSpan.Zero);
 
         unitOfWork.Links.Add(link);
         unitOfWork.Save();
@@ -40,17 +54,9 @@ public class LinkService : ILinkService
     public string GenerateShortLink(string toUrl, TimeSpan expiresAfter, out int id)
     {
         ArgumentNullException.ThrowIfNull(toUrl, nameof(toUrl));
-        using UnitOfWork unitOfWork = _unitOfWorkFactory.CreateUnitOfWork();
+        using IUnitOfWork unitOfWork = CreateUnitOfWork();
 
-        DateTime now = DateTime.UtcNow;
-        Link link = new Link
-        {
-            RedirectToUrl = toUrl,
-            UtcDateCreated = now,
-            UtcDateExpires = now + expiresAfter,
-            IsNeverExpires = false,
-            ShortId = ShortId.Generate(),
-        };
+        Link link = CreateLink(toUrl, false, expiresAfter);
 
         unitOfWork.Links.Add(link);
         unitOfWork.Save();
@@ -61,15 +67,15 @@ public class LinkService : ILinkService
 
     public string? GetLongUrlById(int id)
     {
-        using UnitOfWork unitOfWork = _unitOfWorkFactory.CreateUnitOfWork();
+        using IUnitOfWork unitOfWork = CreateUnitOfWork();
 
-        Link? found = unitOfWork.Links.GetById(id);
+        Link? found = unitOfWork.Links.Get(id);
         return found?.RedirectToUrl;
     }
 
     public string? GetLongUrlByShortId(string shortId)
     {
-        using UnitOfWork unitOfWork = _unitOfWorkFactory.CreateUnitOfWork();
+        using IUnitOfWork unitOfWork = CreateUnitOfWork();
 
         Link? found = unitOfWork.Links.Find(link => link.ShortId == shortId);
         return found?.RedirectToUrl;

@@ -48,12 +48,16 @@
 		</ProjectReference>
 
 		<ProjectReference Include="..\trimlink.data\trimlink.data.csproj" />
+		<ProjectReference Include="..\trimlink.core\trimlink.core.csproj" />
+		<ProjectReference Include="..\trimlink.website\trimlink.website.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <None Remove="UnitTests\" />
+	  <None Remove="Mocks\" />
 	</ItemGroup>
 	<ItemGroup>
 	  <Folder Include="UnitTests\" />
+	  <Folder Include="Mocks\" />
 	</ItemGroup>
 </Project>

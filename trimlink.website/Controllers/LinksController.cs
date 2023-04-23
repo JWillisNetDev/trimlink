@@ -33,18 +33,6 @@ public sealed class LinksController : Controller
     [ProducesResponseType(typeof(LinkGet), StatusCodes.Status201Created)]
     public IActionResult CreateLink([FromBody] LinkCreate linkCreate)
     {
-        //Link link = _mapper.Map<LinkCreate, Link>(linkCreate);
-
-        //// TODO This really should be encapsulated in a service.
-        //link.UtcDateCreated = DateTime.UtcNow;
-        //link.UtcDateExpires = link.IsNeverExpires ?
-        //    DateTime.MaxValue :
-        //    DateTime.UtcNow + linkCreate.GetDurationTimeSpan();
-        //link.ShortId = GenerateShortId();
-
-        //_unitOfWork.Links.Add(link);
-        //_unitOfWork.Save();
-
         int id;
         string shortId;
         if (linkCreate.IsNeverExpires)

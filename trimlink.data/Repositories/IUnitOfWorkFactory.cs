@@ -2,6 +2,11 @@
 
 public interface IUnitOfWorkFactory
 {
-    UnitOfWork CreateUnitOfWork();
+    IUnitOfWork CreateUnitOfWork();
 }
 
+public interface IUnitOfWorkFactory<out TUnitOfWork>
+    where TUnitOfWork : IUnitOfWork
+{
+    TUnitOfWork CreateUnitOfWork();
+}

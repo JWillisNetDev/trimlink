@@ -6,16 +6,23 @@ namespace trimlink.website;
 
 public class UnitOfWorkFactory : IUnitOfWorkFactory
 {
-    private DbContextOptions<TrimLinkDbContext> _options;
+    readonly DbContextOptions<TrimLinkDbContext> _dbContextOptions;
 
-    public UnitOfWorkFactory(DbContextOptions<TrimLinkDbContext> options)
+    public UnitOfWorkFactory(DbContextOptions<TrimLinkDbContext> dbContextOptions)
     {
-        _options = options;
+        _dbContextOptions = dbContextOptions;
     }
 
-    public UnitOfWork CreateUnitOfWork()
+    public UnitOfWorkFactory(Action<DbContextOptionsBuilder<TrimLinkDbContext>> optionsBuilderAction)
     {
-        UnitOfWork unitOfWork = new UnitOfWork(_options);
-        return unitOfWork;
+        DbContextOptionsBuilder<TrimLinkDbContext> builder = new();
+        optionsBuilderAction(builder);
+        _dbContextOptions = builder.Options;
+    }
+
+    public IUnitOfWork CreateUnitOfWork()
+    {
+        TrimLinkDbContext dbContext = new(_dbContextOptions);
+        return new UnitOfWork(dbContext);
     }
 }

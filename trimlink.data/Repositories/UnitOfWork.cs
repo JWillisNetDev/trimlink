@@ -3,27 +3,22 @@ using trimlink.data.Models;
 
 namespace trimlink.data.Repositories;
 
-public class UnitOfWork : IDisposable
+public class UnitOfWork : IUnitOfWork, IDisposable
 {
-    public Guid Id { get; } = Guid.NewGuid();
-
     private TrimLinkDbContext _dbContext;
-
-    public UnitOfWork(DbContextOptions<TrimLinkDbContext> options)
-    {
-        _dbContext = new TrimLinkDbContext(options);
-    }
 
     public UnitOfWork(TrimLinkDbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
-    private Repository<TrimLinkDbContext, Link>? _linkRepository;
-    public IRepository<TrimLinkDbContext, Link> Links
-        => _linkRepository ??= new Repository<TrimLinkDbContext, Link>(_dbContext);
+    private Repository<TrimLinkDbContext, Link, int>? _linkRepository;
+    public IRepository<Link, int> Links => _linkRepository ??= new Repository<TrimLinkDbContext, Link, int>(_dbContext);
 
-    public void Save() => _dbContext.SaveChanges();
+    public void Save()
+    {
+        _dbContext.SaveChanges();
+    }
 
     #region Implements IDisposable
     private bool _disposed;

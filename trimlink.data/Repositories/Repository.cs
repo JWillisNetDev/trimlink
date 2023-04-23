@@ -3,7 +3,7 @@ using trimlink.data.Repositories;
 
 namespace trimlink.data.Repositories;
 
-internal class Repository<TContext, TEntity> : IDisposable, IRepository<TContext, TEntity>
+internal class Repository<TContext, TEntity, TKey> : IRepository<TEntity, TKey>, IDisposable
     where TContext : DbContext
     where TEntity : class
 {
@@ -17,7 +17,7 @@ internal class Repository<TContext, TEntity> : IDisposable, IRepository<TContext
         _dbContext = dbContext;
     }
 
-    public TEntity? GetById(object id)
+    public TEntity? Get(TKey id)
     {
         ArgumentNullException.ThrowIfNull(nameof(id));
         return DbSet.Find(id);
@@ -43,9 +43,9 @@ internal class Repository<TContext, TEntity> : IDisposable, IRepository<TContext
         DbSet.Add(entity);
     }
 
-    public void Remove(object id)
+    public void Remove(TKey id)
     {
-        TEntity? entity = GetById(id);
+        TEntity? entity = Get(id);
         if (entity is not null)
             DbSet.Remove(entity);
     }

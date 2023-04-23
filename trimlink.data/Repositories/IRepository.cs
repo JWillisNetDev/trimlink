@@ -2,17 +2,16 @@
 
 namespace trimlink.data.Repositories;
 
-public interface IRepository<TContext, TEntity> : IDisposable
-    where TContext : DbContext
+public interface IRepository<TEntity, TKey> : IDisposable
     where TEntity : class
 {
-    TEntity? GetById(object id);
+    TEntity? Get(TKey id);
     IEnumerable<TEntity> GetAll();
 
     TEntity? Find(Func<TEntity, bool> predicate);
     IEnumerable<TEntity> Filter(Func<TEntity, bool> predicate);
 
     void Add(TEntity entity);
-    void Remove(object id);
+    void Remove(TKey id);
     void Update(TEntity entity);
 }
