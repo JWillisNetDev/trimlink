@@ -6,25 +6,25 @@ namespace trimlink.tests.Mocks;
 
 public class MockLinkService
 {
+    const string ExpectedToken = "uqsynBwWfNuv";
+    const string ExpectedLongUrl = "https://www.google.com/";
+
     public static Mock<ILinkService> GetMock()
     {
-        const string expectedShortId = "uqsynBwWfNuv";
-        const string expectedLongUrl = "https://www.google.com/";
-
         Mock<ILinkService> mock = new();
 
         int expectedId = 0;
         mock.Setup(ls => ls.GenerateShortLink(It.IsAny<string>(), out expectedId))
-            .Returns(expectedShortId);
+            .Returns(ExpectedToken);
 
         mock.Setup(ls => ls.GenerateShortLink(It.IsAny<string>(), It.IsAny<TimeSpan>(), out expectedId))
-            .Returns(expectedShortId);
+            .Returns(ExpectedToken);
 
         mock.Setup(ls => ls.GetLongUrlById(It.IsAny<int>()))
-            .Returns(expectedLongUrl);
+            .Returns(ExpectedLongUrl);
 
-        mock.Setup(ls => ls.GetLongUrlByShortId(It.IsAny<string>()))
-            .Returns(expectedLongUrl);
+        mock.Setup(ls => ls.GetLongUrlByToken(It.IsAny<string>()))
+            .Returns(ExpectedLongUrl);
 
         return mock;
     }

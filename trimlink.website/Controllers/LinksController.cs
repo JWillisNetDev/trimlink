@@ -30,8 +30,8 @@ public sealed class LinksController : Controller
         => ShortId.Generate(_generationOptions);
 
     [HttpPost("create")]
-    [ProducesResponseType(typeof(LinkGet), StatusCodes.Status201Created)]
-    public IActionResult CreateLink([FromBody] LinkCreate linkCreate)
+    [ProducesResponseType(typeof(LinkGetDto), StatusCodes.Status201Created)]
+    public IActionResult CreateLink([FromBody] LinkCreateDto linkCreate)
     {
         int id;
         string shortId;
@@ -45,13 +45,13 @@ public sealed class LinksController : Controller
             shortId = _linkService.GenerateShortLink(linkCreate.RedirectToUrl, expiresAfter, out id);
         }
 
-        return Ok($"{Url.Content("~/")}/to/{shortId}");
+        return Created(Url?.Link("RedirectTo", new { shortId }) ?? string.Empty, shortId);
     }
 
-    [HttpGet("~/to/{shortId}")]
+    [HttpGet("~/to/{shortId}", Name = "RedirectTo")]
     public IActionResult RedirectFromLink([FromRoute] string shortId)
     {
-        string? toUrl = _linkService.GetLongUrlByShortId(shortId);
+        string? toUrl = _linkService.GetLongUrlByToken(shortId);
 
         return toUrl is null ?
             NotFound() :

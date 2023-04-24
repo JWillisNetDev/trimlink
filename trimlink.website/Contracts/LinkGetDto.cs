@@ -1,6 +1,6 @@
 ﻿namespace trimlink.website.Contracts;
 
-public class LinkGet
+public class LinkGetDto
 {
     public int Id { get; set; }
     public DateTime DateCreated { get; set; }

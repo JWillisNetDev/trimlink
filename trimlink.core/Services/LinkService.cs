@@ -9,41 +9,76 @@ namespace trimlink.core.Services;
 
 public class LinkService : ILinkService
 {
-    private static Link CreateLink(string toUrl, bool isNeverExpires, TimeSpan expiresAfter)
+    private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+    private readonly ITokenGenerator _tokenGenerator;
+    private readonly ILinkValidator _linkValidator;
+
+    public LinkService(
+        IUnitOfWorkFactory unitOfWorkFactory,
+        ITokenGenerator tokenGenerator,
+        ILinkValidator linkValidator
+    )
     {
-        string shortId = ShortId.Generate();
+        _unitOfWorkFactory = unitOfWorkFactory;
+        _tokenGenerator = tokenGenerator;
+        _linkValidator = linkValidator;
+    }
+
+    public LinkService(IUnitOfWorkFactory unitOfWorkFactory, ITokenGenerator tokenGenerator) : this(unitOfWorkFactory, tokenGenerator, new DefaultLinkValidator())
+    {
+    }
+
+    public LinkService(IUnitOfWorkFactory unitOfWorkFactory, ILinkValidator linkValidator) : this(unitOfWorkFactory, new DefaultTokenGenerator(), linkValidator)
+    {
+    }
+
+    public LinkService(IUnitOfWorkFactory unitOfWorkFactory) : this(unitOfWorkFactory, new DefaultTokenGenerator(), new DefaultLinkValidator())
+    {
+    }
+
+    private Link CreateLink(string toUrl, bool isNeverExpires, TimeSpan expiresAfter)
+    {
+        string token = _tokenGenerator.GenerateToken();
         DateTime now = DateTime.UtcNow;
-        Link link = new Link()
+        Link link = new()
         {
             RedirectToUrl = toUrl,
-            ShortId = shortId,
+            ShortId = token,
             IsMarkedForDeletion = false,
-            UtcDateCreated = now,
             IsNeverExpires = isNeverExpires,
+            UtcDateCreated = now,
             UtcDateExpires = isNeverExpires ? DateTime.MaxValue : now + expiresAfter,
         };
         return link;
     }
 
-    private static Link CreateLink(string toUrl)
+    private Link CreateLink(string toUrl)
         => CreateLink(toUrl, true, TimeSpan.Zero);
 
-    public LinkService(IUnitOfWorkFactory unitOfWorkFactory)
+    private IUnitOfWork CreateUnitOfWork()
+        => _unitOfWorkFactory.CreateUnitOfWork();
+
+    private void HandleLinkValidation(string toUrl)
     {
-        _unitOfWorkFactory = unitOfWorkFactory;
+        ArgumentNullException.ThrowIfNullOrEmpty(toUrl);
+        LinkValidationResult result = _linkValidator.Validate(toUrl);
+        if (result == LinkValidationResult.InvalidScheme)
+        {
+            throw new ArgumentException($"The given URL ({toUrl}) has an invalid scheme.");
+        }
+        else if (result == LinkValidationResult.InvalidRelative)
+        {
+            throw new ArgumentException($"The given URL ({toUrl}) cannot be a relative path.");
+        }
     }
-
-    private readonly IUnitOfWorkFactory _unitOfWorkFactory;
-
-    private IUnitOfWork CreateUnitOfWork() => _unitOfWorkFactory.CreateUnitOfWork();
 
     public string GenerateShortLink(string toUrl, out int id)
     {
-        ArgumentNullException.ThrowIfNull(toUrl, nameof(toUrl));
-        using IUnitOfWork unitOfWork = CreateUnitOfWork();
+        HandleLinkValidation(toUrl);
 
         Link link = CreateLink(toUrl, true, TimeSpan.Zero);
 
+        using IUnitOfWork unitOfWork = CreateUnitOfWork();
         unitOfWork.Links.Add(link);
         unitOfWork.Save();
 
@@ -53,11 +88,11 @@ public class LinkService : ILinkService
 
     public string GenerateShortLink(string toUrl, TimeSpan expiresAfter, out int id)
     {
-        ArgumentNullException.ThrowIfNull(toUrl, nameof(toUrl));
-        using IUnitOfWork unitOfWork = CreateUnitOfWork();
+        HandleLinkValidation(toUrl);
 
         Link link = CreateLink(toUrl, false, expiresAfter);
 
+        using IUnitOfWork unitOfWork = CreateUnitOfWork();
         unitOfWork.Links.Add(link);
         unitOfWork.Save();
 
@@ -68,15 +103,13 @@ public class LinkService : ILinkService
     public string? GetLongUrlById(int id)
     {
         using IUnitOfWork unitOfWork = CreateUnitOfWork();
-
         Link? found = unitOfWork.Links.Get(id);
         return found?.RedirectToUrl;
     }
 
-    public string? GetLongUrlByShortId(string shortId)
+    public string? GetLongUrlByToken(string shortId)
     {
         using IUnitOfWork unitOfWork = CreateUnitOfWork();
-
         Link? found = unitOfWork.Links.Find(link => link.ShortId == shortId);
         return found?.RedirectToUrl;
     }

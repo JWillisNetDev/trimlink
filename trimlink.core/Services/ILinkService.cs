@@ -8,5 +8,5 @@ public interface ILinkService
     string GenerateShortLink(string toUrl, TimeSpan expiresAfter, out int id);
 
     string? GetLongUrlById(int id);
-    string? GetLongUrlByShortId(string shortId);
+    string? GetLongUrlByToken(string shortId);
 }
