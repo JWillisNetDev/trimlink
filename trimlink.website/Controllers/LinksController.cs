@@ -8,6 +8,7 @@ using shortid;
 using shortid.Configuration;
 using trimlink.data.Repositories;
 using trimlink.core.Services;
+using Microsoft.AspNetCore.Cors;
 
 namespace trimlink.website.Controllers;
 
@@ -29,7 +30,7 @@ public sealed class LinksController : Controller
     private string GenerateShortId()
         => ShortId.Generate(_generationOptions);
 
-    [HttpPost("create")]
+    [HttpPost(Name = "CreateLink")]
     [ProducesResponseType(typeof(LinkGetDto), StatusCodes.Status201Created)]
     public IActionResult CreateLink([FromBody] LinkCreateDto linkCreate)
     {
@@ -41,8 +42,7 @@ public sealed class LinksController : Controller
         }
         else
         {
-            TimeSpan expiresAfter = TimeSpan.Parse(linkCreate.Duration);
-            shortId = _linkService.GenerateShortLink(linkCreate.RedirectToUrl, expiresAfter, out id);
+            shortId = _linkService.GenerateShortLink(linkCreate.RedirectToUrl, linkCreate.Duration, out id);
         }
 
         return Created(Url?.Link("RedirectTo", new { shortId }) ?? string.Empty, shortId);

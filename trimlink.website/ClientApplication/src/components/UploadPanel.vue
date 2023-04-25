@@ -1,61 +1,102 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 import { TimeIncrement } from '@/types/TimeIncrement'
+import { LinkCreateForm } from '@/types/LinkCreateForm'
+import { Duration } from 'ts-luxon'
+import axios from 'axios'
 
-const timeIncrementMap = [
-  { increment: TimeIncrement.Minutes, display: 'minute(s)' },
-  { increment: TimeIncrement.Hours, display: 'hour(s)' },
-  { increment: TimeIncrement.Days, display: 'day(s)' },
-  { increment: TimeIncrement.Weeks, display: 'week(s)' }
-]
-const inputScalarUnit = ref(0)
-const selectedTimeIncrement = ref(0)
-const isNeverExpiresChecked = ref(false)
-const isNumber = ref([ (value: any) => isNaN(parseFloat(value)) ? 'You must enter a valid number.' : true ])
+const timeIncrements = [ TimeIncrement.Minutes, TimeIncrement.Hours, TimeIncrement.Days, TimeIncrement.Weeks ];
+
+const formData = reactive(new LinkCreateForm())
+
+const expiresIn = ref(0);
+const expiresInIncrement = ref(TimeIncrement.Minutes);
+
+async function submit() {
+  if (!formData.isNeverExpires) {
+    const format = 'ddd.hh:mm:ss.SSS';
+    switch (expiresInIncrement.value) {
+      case TimeIncrement.Minutes:
+        formData.duration = Duration.fromObject({ minutes: expiresIn.value }).toFormat(format) || '';
+        break;
+      case TimeIncrement.Hours:
+        formData.duration = Duration.fromObject({ hours: expiresIn.value }).toFormat(format) || '';
+        break;
+      case TimeIncrement.Days:
+        formData.duration = Duration.fromObject({ days: expiresIn.value }).toFormat(format) || '';
+        break;
+    }
+    console.log(formData.duration);
+  }
+  axios({
+    method: 'post',
+    url: '/api/links', //url: 'https://localhost:7295/api/Links',
+    data: formData,
+    withCredentials: false,
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  }).catch(err => console.log(err));
+
+
+  // const response = await axios('/api/Links', {
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //   },
+  //   body: JSON.stringify(formData)
+  // }).then(resp => resp.text);
+
+}
+
 </script>
 
 <template>
-  <v-container width="100%">
-    <v-form>
-      <v-row>
-        <v-col>
-          <h2>Expiration</h2>
-        </v-col>
-      </v-row>
-      <v-row no-gutters>
-        <v-col cols="1">
+  <v-form>
+    <v-container>
+      <v-row justify="center">
+        <v-col cols="8">
           <v-text-field
-            density="compact"
-            :rules="isNumber"
-            v-model="inputScalarUnit"
-            :disabled="isNeverExpiresChecked"
-          />
+            label="Url to Shorten"
+            v-model="formData.redirectToUrl"
+            variant="solo" />
         </v-col>
-        <v-col cols="3" class="mx-4">
+      </v-row> 
+      <v-row justify="center">
+        <v-col cols="3">
+          <v-text-field
+            class="mx-2"
+            variant="solo"
+            :disabled="formData.isNeverExpires"
+            v-model="expiresIn" />
+        </v-col>
+        <v-col cols="3">  
           <v-select
-            :items="timeIncrementMap"
+            class="mx-2"
+            variant="solo"
+            :disabled="formData.isNeverExpires"
+            :items="timeIncrements"
+            v-model="expiresInIncrement"
+            label="Time Increment"
             item-title="display"
-            item-value="increment"
-            single-line
-            density="compact"
-            :disabled="isNeverExpiresChecked"
-            v-model="selectedTimeIncrement"
-          />
+            item-value="increment" />
         </v-col>
-        <v-col>
+        <v-col cols="2">
           <v-checkbox
-            density="compact"
-            class="text-subtitle-1"
-            v-model="isNeverExpiresChecked"
-            label="Never Expires"
-          />
+            class="mx-2"
+            v-model="formData.isNeverExpires"
+            label="Never Expires" />
         </v-col>
       </v-row>
-      <v-row>
-        <h2>Selected value: {{ selectedTimeIncrement }}</h2>
+      <v-row justify="center">
+        <v-btn
+          color="primary"
+          @click="submit" >
+          Shorten Url
+        </v-btn>
       </v-row>
-    </v-form>
-</v-container>
+    </v-container>
+  </v-form>
 </template>
 
-<style scoped></style>
+<style scoped>
+</style>

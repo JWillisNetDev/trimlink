@@ -9,7 +9,7 @@
 
 		<SpaRoot>ClientApplication\</SpaRoot>
 
-		<SpaProxyServerUrl>http://localhost:5173</SpaProxyServerUrl>
+		<SpaProxyServerUrl>https://localhost:5173</SpaProxyServerUrl>
 
 		<SpaProxyLaunchCommand>npm run dev</SpaProxyLaunchCommand>
 

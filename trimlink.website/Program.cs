@@ -37,6 +37,8 @@ builder.Services.AddSingleton<ILinkService, LinkService>(sp =>
     return new LinkService(unitOfWorkFactory);
 });
 
+builder.Services.AddCors();
+
 // TODO Add Authentication using jwt bearer authentication schema (maybe?)
 
 var app = builder.Build();
@@ -48,6 +50,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.UseDeveloperExceptionPage();
 }
+
+app.UseCors(policy =>
+{
+    policy
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .WithOrigins("https://localhost:5173");
+});
 
 app.UseStaticFiles();
 

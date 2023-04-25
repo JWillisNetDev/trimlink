@@ -1,6 +1,6 @@
 export enum TimeIncrement {
-  Minutes,
-  Hours,
-  Days,
-  Weeks
+  Minutes = 'minute(s)',
+  Hours = 'hour(s)',
+  Days = 'day(s)',
+  Weeks = 'week(s)',
 }
