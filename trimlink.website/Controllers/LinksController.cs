@@ -18,11 +18,13 @@ public sealed class LinksController : Controller
     private readonly GenerationOptions _generationOptions
         = new GenerationOptions(useNumbers: true, useSpecialCharacters: false, length: 18);
 
+    private readonly ILogger<LinksController> _logger;
     private readonly IMapper _mapper;
     private readonly ILinkService _linkService;
 
-    public LinksController(IMapper mapper, ILinkService linkService)
+    public LinksController(ILogger<LinksController> logger, IMapper mapper, ILinkService linkService)
     {
+        _logger = logger;
         _mapper = mapper;
         _linkService = linkService;
     }
@@ -35,20 +37,24 @@ public sealed class LinksController : Controller
     public IActionResult CreateLink([FromBody] LinkCreateDto linkCreate)
     {
         int id;
-        string shortId;
+        string token;
         if (linkCreate.IsNeverExpires)
         {
-            shortId = _linkService.GenerateShortLink(linkCreate.RedirectToUrl, out id);
+            token = _linkService.GenerateShortLink(linkCreate.RedirectToUrl, out id);
         }
         else
         {
-            shortId = _linkService.GenerateShortLink(linkCreate.RedirectToUrl, linkCreate.Duration, out id);
+            token = _linkService.GenerateShortLink(linkCreate.RedirectToUrl, linkCreate.Duration, out id);
         }
 
-        return Created(Url?.Link("RedirectTo", new { shortId }) ?? string.Empty, shortId);
+        _logger.LogInformation("Generated {token} redirect to {url}", token, linkCreate.RedirectToUrl);
+
+        return Created(Url?.Link("RedirectTo", new { token }) ?? string.Empty, token);
     }
 
     [HttpGet("~/to/{shortId}", Name = "RedirectTo")]
+    [ProducesResponseType(typeof(string), StatusCodes.Status302Found)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult RedirectFromLink([FromRoute] string shortId)
     {
         string? toUrl = _linkService.GetLongUrlByToken(shortId);

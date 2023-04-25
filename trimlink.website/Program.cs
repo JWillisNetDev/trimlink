@@ -6,8 +6,26 @@ using shortid;
 using trimlink.data.Repositories;
 using trimlink.core.Services;
 using trimlink.website;
+using Serilog;
+using Serilog.AspNetCore;
+
+// Configure Serilog immediately to enable logging during the configuration portion of application lifetime
+using ILogger = Serilog.ILogger;
+
+IConfiguration config = new ConfigurationBuilder()
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json")
+    .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development"}.json")
+    .Build();
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(config)
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add SeriLog for logging to file (prod) and terminal (dev)
+builder.Host.UseSerilog();
 
 // Add services to the container.
 
@@ -43,6 +61,12 @@ builder.Services.AddCors();
 
 var app = builder.Build();
 
+app.UseStaticFiles();
+
+// Add request logging via Serilog.
+// Do this before MapControllers() but after UseStaticFiles() to reduce unnecessary log noise.
+app.UseSerilogRequestLogging();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -59,7 +83,6 @@ app.UseCors(policy =>
         .WithOrigins("https://localhost:5173");
 });
 
-app.UseStaticFiles();
 
 app.MapFallbackToFile("index.html");
 

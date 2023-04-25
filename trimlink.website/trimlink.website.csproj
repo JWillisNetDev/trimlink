@@ -26,8 +26,8 @@
 
 	</ItemGroup>
 
-	<PropertyGroup Condition=" '$(RunConfiguration)' == 'vite + https' " />
-
+	<PropertyGroup Condition=" '$(RunConfiguration)' == 'swagger - https (develop)' " />
+	<PropertyGroup Condition=" '$(RunConfiguration)' == 'vite - https (production)' " />
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.4" />
 
@@ -50,6 +50,10 @@
 
 		<PackageReference Include="Microsoft.AspNetCore.SpaProxy" Version="7.0.5" />
 
+		<PackageReference Include="Serilog" Version="2.12.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
+		<PackageReference Include="Serilog.AspNetCore" Version="6.1.0" />
 	</ItemGroup>
 
 	<Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition="'$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules')">

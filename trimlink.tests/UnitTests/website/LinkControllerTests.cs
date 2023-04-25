@@ -2,6 +2,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using trimlink.core.Services;
 using trimlink.tests.Mocks;
@@ -15,6 +16,7 @@ namespace trimlink.tests.UnitTests.website;
 public class LinksControllerTests
 {
     IMapper mapper;
+    Mock<ILogger<LinksController>> mockLogger;
     Mock<ILinkService> mockLinkService;
     Mock<IUrlHelper> mockUrlHelper;
     LinksController controller;
@@ -25,10 +27,11 @@ public class LinksControllerTests
         MapperConfiguration config = new(cfg => cfg.AddProfile<MappingProfile>());
         mapper = new Mapper(config);
 
+        mockLogger = new Mock<ILogger<LinksController>>();
         mockLinkService = MockLinkService.GetMock();
         mockUrlHelper = MockUrlHelper.GetMock();
 
-        controller = new LinksController(mapper, mockLinkService.Object);
+        controller = new LinksController(mockLogger.Object, mapper, mockLinkService.Object);
         controller.Url = mockUrlHelper.Object;
     }
 
