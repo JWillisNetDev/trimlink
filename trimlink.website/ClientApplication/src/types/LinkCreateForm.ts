@@ -1,7 +1,7 @@
-import { TimeIncrement } from "./TimeIncrement";
+import { TimeIncrement } from './TimeIncrement'
 
 export class LinkCreateForm {
-    redirectToUrl: string = '';
-    isNeverExpires: boolean = false;
-    duration: string = '';
+  redirectToUrl: string = ''
+  isNeverExpires: boolean = false
+  duration: string = ''
 }

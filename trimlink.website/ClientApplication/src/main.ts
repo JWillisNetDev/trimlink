@@ -5,6 +5,22 @@ import { mdi } from 'vuetify/iconsets/mdi'
 import './assets/main.css'
 import '@mdi/font/css/materialdesignicons.css'
 
+// Vue Router
+import { createRouter, createWebHistory } from 'vue-router'
+
+const routes = [
+  {
+    name: "home",
+    path: '/',
+    component: () => import('@/views/TheHome.vue')
+  },
+  {
+    name: "notfound",
+    path: '/:pathMatch(.*)*', // https://router.vuejs.org/guide/migration/#removed-star-or-catch-all-routes
+    component: () => import('@/views/NotFound.vue')
+  },
+]
+
 // Vuetify setup
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
@@ -22,4 +38,9 @@ const vuetify = createVuetify({
   }
 })
 
-createApp(App).use(vuetify).mount('#app')
+const router = createRouter({
+  history: createWebHistory(),
+  routes
+})
+
+createApp(App).use(vuetify).use(router).mount('#app')

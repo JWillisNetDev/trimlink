@@ -3,15 +3,15 @@ import UploadPanel from '@/components/UploadPanel.vue'
 </script>
 
 <template>
-  <v-layout >
+  <v-layout>
     <v-app-bar elevation="1">
-      <v-toolbar-title>Shorten Url</v-toolbar-title>
+      <v-toolbar-title to="/">Shorten Url</v-toolbar-title>
     </v-app-bar>
     <v-main>
-      <UploadPanel />
+      <RouterView />
+      <!-- <UploadPanel /> -->
     </v-main>
   </v-layout>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

@@ -41,7 +41,7 @@ public class LinksControllerTests
         LinkCreateDto linkCreate = new()
         {
             RedirectToUrl = "https://www.google.com/",
-            Duration = "7.00:00",
+            Duration = TimeSpan.FromHours(42),
             IsNeverExpires = false,
         };
 
