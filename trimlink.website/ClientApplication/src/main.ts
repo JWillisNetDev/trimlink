@@ -10,15 +10,15 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
   {
-    name: "home",
+    name: 'home',
     path: '/',
     component: () => import('@/views/TheHome.vue')
   },
   {
-    name: "notfound",
+    name: 'notfound',
     path: '/:pathMatch(.*)*', // https://router.vuejs.org/guide/migration/#removed-star-or-catch-all-routes
     component: () => import('@/views/NotFound.vue')
-  },
+  }
 ]
 
 // Vuetify setup

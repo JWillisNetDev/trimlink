@@ -7,9 +7,8 @@ import UploadPanel from '@/components/UploadPanel.vue'
     <v-app-bar elevation="1">
       <v-toolbar-title to="/">Shorten Url</v-toolbar-title>
     </v-app-bar>
-    <v-main>
+    <v-main class="pa-0">
       <RouterView />
-      <!-- <UploadPanel /> -->
     </v-main>
   </v-layout>
 </template>

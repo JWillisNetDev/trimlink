@@ -42,13 +42,6 @@ async function submit() {
       'Content-Type': 'application/json'
     }
   }).catch((err) => console.log(err))
-
-  // const response = await axios('/api/Links', {
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify(formData)
-  // }).then(resp => resp.text);
 }
 </script>
 
@@ -57,12 +50,19 @@ async function submit() {
     <v-container>
       <v-row justify="center">
         <v-col cols="8">
-          <v-text-field label="Url to Shorten" v-model="formData.redirectToUrl" variant="solo" />
+          <v-text-field
+            hide-details="auto"
+            label="Url to Shorten"
+            v-model="formData.redirectToUrl"
+            variant="solo"
+          />
         </v-col>
       </v-row>
       <v-row justify="center">
         <v-col cols="3">
           <v-text-field
+            type="number"
+            hide-details="auto"
             class="mx-2"
             variant="solo"
             :disabled="formData.isNeverExpires"
@@ -71,6 +71,7 @@ async function submit() {
         </v-col>
         <v-col cols="3">
           <v-select
+            hide-details="auto"
             class="mx-2"
             variant="solo"
             :disabled="formData.isNeverExpires"
@@ -82,10 +83,15 @@ async function submit() {
           />
         </v-col>
         <v-col cols="2">
-          <v-checkbox class="mx-2" v-model="formData.isNeverExpires" label="Never Expires" />
+          <v-checkbox
+            hide-details="auto"
+            class="mx-2"
+            v-model="formData.isNeverExpires"
+            label="Never Expires"
+          />
         </v-col>
       </v-row>
-      <v-row justify="center">
+      <v-row justify="center" class="pa-2">
         <v-btn color="primary" @click="submit"> Shorten Url </v-btn>
       </v-row>
     </v-container>

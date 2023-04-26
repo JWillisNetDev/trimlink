@@ -24,6 +24,30 @@ Log.Logger = new LoggerConfiguration()
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Create our CORS policy
+const string _MyAllowFrontend = "MyAllowFrontend";
+
+builder.Services.AddCors(options =>
+{
+    if (builder.Environment.IsDevelopment())
+        options.AddPolicy(_MyAllowFrontend, options =>
+        {
+            options
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowAnyOrigin();
+        });
+    else
+        options.AddPolicy(_MyAllowFrontend, options =>
+        {
+            options
+                .WithOrigins("https://localhost:5173")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+    
+});
+
 // Add SeriLog for logging to file (prod) and terminal (dev)
 builder.Host.UseSerilog();
 
@@ -50,6 +74,11 @@ builder.Services.AddSingleton<ILinkService, LinkService>(sp =>
         {
             opts.UseInMemoryDatabase("trimlink-devdb");
         }
+
+        if (builder.Environment.IsProduction())
+        {
+            opts.UseSqlServer();
+        }
     });
 
     return new LinkService(unitOfWorkFactory);
@@ -75,14 +104,7 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
-app.UseCors(policy =>
-{
-    policy
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .WithOrigins("https://localhost:5173");
-});
-
+app.UseCors(_MyAllowFrontend);
 
 app.MapFallbackToFile("index.html");
 

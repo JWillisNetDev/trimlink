@@ -19,7 +19,7 @@ internal class Repository<TContext, TEntity, TKey> : IRepository<TEntity, TKey>,
 
     public TEntity? Get(TKey id)
     {
-        ArgumentNullException.ThrowIfNull(nameof(id));
+        ArgumentNullException.ThrowIfNull(id, nameof(id));
         return DbSet.Find(id);
     }
 

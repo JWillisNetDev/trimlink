@@ -4,7 +4,7 @@ using trimlink.data.Repositories;
 
 namespace trimlink.website;
 
-public class UnitOfWorkFactory : IUnitOfWorkFactory
+internal class UnitOfWorkFactory : IUnitOfWorkFactory
 {
     readonly DbContextOptions<TrimLinkDbContext> _dbContextOptions;
 
