@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "trimlink.core", "trimlink.c
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BB4BF94D-DDCF-40E2-9D97-81CEE6D0BEF4}"
 	ProjectSection(SolutionItems) = preProject
-		directory.build.props = directory.build.props
+		Directory.Build.targets = Directory.Build.targets
 	EndProjectSection
 EndProject
 Global
