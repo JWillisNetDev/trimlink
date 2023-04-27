@@ -17,8 +17,9 @@
 		<None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
 	</ItemGroup>
 
-	<PropertyGroup Condition=" '$(RunConfiguration)' == 'swagger - https (develop)' " />
-	<PropertyGroup Condition=" '$(RunConfiguration)' == 'vite - https (production)' " />
+	<PropertyGroup Condition=" '$(RunConfiguration)' == 'swagger - https - develop' " />
+	<PropertyGroup Condition=" '$(RunConfiguration)' == 'frontend - https - prod' " />
+	<PropertyGroup Condition=" '$(RunConfiguration)' == 'frontend - https - develop' " />
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.4" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
