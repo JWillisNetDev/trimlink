@@ -4,6 +4,7 @@ using trimlink.data.Models;
 using trimlink.data.Repositories;
 using shortid;
 using Microsoft.EntityFrameworkCore;
+using trimlink.core.Records;
 
 namespace trimlink.core.Services;
 
@@ -43,7 +44,7 @@ public class LinkService : ILinkService
         Link link = new()
         {
             RedirectToUrl = toUrl,
-            ShortId = token,
+            Token = token,
             IsMarkedForDeletion = false,
             IsNeverExpires = isNeverExpires,
             UtcDateCreated = now,
@@ -83,7 +84,7 @@ public class LinkService : ILinkService
         unitOfWork.Save();
 
         id = link.Id;
-        return link.ShortId;
+        return link.Token;
     }
 
     public string GenerateShortLink(string toUrl, TimeSpan expiresAfter, out int id)
@@ -97,7 +98,7 @@ public class LinkService : ILinkService
         unitOfWork.Save();
 
         id = link.Id;
-        return link.ShortId;
+        return link.Token;
     }
 
     public string? GetLongUrlById(int id)
@@ -110,7 +111,25 @@ public class LinkService : ILinkService
     public string? GetLongUrlByToken(string shortId)
     {
         using IUnitOfWork unitOfWork = CreateUnitOfWork();
-        Link? found = unitOfWork.Links.Find(link => link.ShortId == shortId);
+        Link? found = unitOfWork.Links.Find(link => link.Token == shortId);
         return found?.RedirectToUrl;
+    }
+
+    public LinkDetails? GetLinkDetailsById(int id)
+    {
+        using IUnitOfWork unitOfWork = CreateUnitOfWork();
+        Link? found = unitOfWork.Links.Get(id);
+        return found is null ?
+            null :
+            new LinkDetails(found);
+    }
+
+    public LinkDetails? GetLinkDetailsByToken(string token)
+    {
+        using IUnitOfWork unitOfWork = CreateUnitOfWork();
+        Link? found = unitOfWork.Links.Find(link => link.Token == token);
+        return found is null ?
+            null :
+            new LinkDetails(found);
     }
 }

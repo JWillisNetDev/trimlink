@@ -1,5 +1,6 @@
 ﻿using Moq;
 using trimlink.core;
+using trimlink.core.Records;
 using trimlink.core.Services;
 using trimlink.data.Models;
 using trimlink.data.Repositories;
@@ -10,7 +11,7 @@ namespace trimlink.tests.UnitTests.core;
 [TestFixture]
 public class LinkServiceTests
 {
-    /// <summary>Do not directly access this field <i>(unless if you know what you're doing)</i>.</summary>
+    /// <summary>Do not directly access this field <i>(unless if you know what you're doing)</i>.<br />Use <see cref="linkService"/> instead.</summary>
     LinkService? _linkService = null;
     LinkService linkService => _linkService ??= new LinkService(mockFactory.Object, mockGenerator.Object, mockValidator.Object);
 
@@ -152,5 +153,47 @@ public class LinkServiceTests
         string? actualUrl = linkService.GetLongUrlByToken(token);
 
         Assert.That(actualUrl, Is.Null);
+    }
+
+    [Test]
+    public void GetLinkDetailsById_GivenValidId_ReturnsLinkDetails()
+    {
+        const int expectedId = 0;
+
+        LinkDetails? actual = linkService.GetLinkDetailsById(expectedId);
+
+        Assert.That(actual, Is.Not.Null);
+        Assert.That(actual.Id, Is.EqualTo(expectedId));
+    }
+
+    [Test]
+    public void GetLinkDetailsById_GivenInvalidId_ReturnsNull()
+    {
+        const int expectedId = 42;
+
+        LinkDetails? actual = linkService.GetLinkDetailsById(expectedId);
+
+        Assert.That(actual, Is.Null);
+    }
+
+    [Test]
+    public void GetLinkDetailsByToken_GivenValidToken_ReturnsLinkDetails()
+    {
+        const string expectedToken = "UZuMieEQHEha";
+
+        LinkDetails? actual = linkService.GetLinkDetailsByToken(expectedToken);
+
+        Assert.That(actual, Is.Not.Null);
+        Assert.That(actual.Token, Is.EqualTo(expectedToken));
+    }
+
+    [Test]
+    public void GetLinkDetailsByToken_GivenInvalidToken_ReturnsNull()
+    {
+        const string expectedToken = "inigo montoya";
+
+        LinkDetails? actual = linkService.GetLinkDetailsByToken(expectedToken);
+
+        Assert.That(actual, Is.Null);
     }
 }

@@ -4,7 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace trimlink.data.Models;
 
-[Index(nameof(ShortId), Name = "UX_Links_ShortId", IsUnique = true)]
+[Index(nameof(Token), Name = "UX_Links_Token", IsUnique = true)]
+[Index(nameof(UtcDateExpires), Name = "IX_Links_UtcDateExpires")]
 public class Link
 {
     /// <summary>
@@ -35,9 +36,9 @@ public class Link
     public bool IsMarkedForDeletion { get; set; }
 
     /// <summary>
-    /// The randomly generated ShortId string. Only set once during instantiation.
+    /// The randomly generated Token string. Only set once during instantiation.
     /// </summary>
-    public string ShortId { get; set; } = string.Empty;
+    public string Token { get; set; } = string.Empty;
 
     /// <summary>
     /// The URL to redirect to when visiting the fully-qualified <see cref="Link.TrimmedUrl"/>.

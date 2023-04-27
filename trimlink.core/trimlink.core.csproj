@@ -5,9 +5,11 @@
   </PropertyGroup>
 	<ItemGroup>
 		<None Remove="Services\" />
+		<None Remove="Records\" />
 	</ItemGroup>
 	<ItemGroup>
 		<Folder Include="Services\" />
+		<Folder Include="Records\" />
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\trimlink.data\trimlink.data.csproj" />

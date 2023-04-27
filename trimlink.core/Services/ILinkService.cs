@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace trimlink.core.Services;
+﻿namespace trimlink.core.Services;
 
 public interface ILinkService
 {
@@ -8,5 +6,8 @@ public interface ILinkService
     string GenerateShortLink(string toUrl, TimeSpan expiresAfter, out int id);
 
     string? GetLongUrlById(int id);
-    string? GetLongUrlByToken(string shortId);
+    string? GetLongUrlByToken(string token);
+
+    Records.LinkDetails? GetLinkDetailsById(int id);
+    Records.LinkDetails? GetLinkDetailsByToken(string token);
 }

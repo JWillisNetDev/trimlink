@@ -1,14 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using trimlink.data;
-using trimlink.data.Models;
 using trimlink.website.Contracts;
 using AutoMapper;
 using shortid;
 using shortid.Configuration;
 using trimlink.data.Repositories;
 using trimlink.core.Services;
-using Microsoft.AspNetCore.Cors;
+using trimlink.core.Records;
 
 namespace trimlink.website.Controllers;
 
@@ -52,15 +50,29 @@ public sealed class LinksController : Controller
         return Created(Url?.Link("RedirectTo", new { token }) ?? string.Empty, token);
     }
 
-    [HttpGet("~/to/{shortId}", Name = "RedirectTo")]
-    [ProducesResponseType(typeof(string), StatusCodes.Status302Found)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult RedirectFromLink([FromRoute] string shortId)
+    [HttpGet("{token}", Name = "RedirectTo")]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    public IActionResult RedirectFromLink([FromRoute] string token)
     {
-        string? toUrl = _linkService.GetLongUrlByToken(shortId);
+        string? toUrl = _linkService.GetLongUrlByToken(token);
 
         return toUrl is null ?
-            NotFound() :
-            Redirect(toUrl);
+            NotFound(token) :
+            Ok(toUrl);
+    }
+
+    [HttpGet("{token}/details", Name = "LinkDetails")]
+    [ProducesResponseType(typeof(LinkGetDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    public IActionResult GetLinkDetails([FromRoute] string token)
+    {
+        var link = _linkService.GetLinkDetailsByToken(token);
+
+        if (link is null)
+            return NotFound(token);
+
+        LinkGetDto linkDetails = _mapper.Map<LinkDetails, LinkGetDto>(link);
+        return Ok(linkDetails);
     }
 }

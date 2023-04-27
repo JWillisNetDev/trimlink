@@ -19,7 +19,7 @@ internal class MockLinkRepository
                 UtcDateExpires = DateTime.Parse("2024-03-26 12:00:00.000"),
                 IsNeverExpires = false,
                 IsMarkedForDeletion = false,
-                ShortId = "UZuMieEQHEha",
+                Token = "UZuMieEQHEha",
                 RedirectToUrl = "https://www.google.com/",
             },
             new Link()
@@ -29,7 +29,7 @@ internal class MockLinkRepository
                 UtcDateExpires = DateTime.MaxValue,
                 IsNeverExpires = true,
                 IsMarkedForDeletion = false,
-                ShortId = "sVFwysRodYWB",
+                Token = "sVFwysRodYWB",
                 RedirectToUrl = "https://www.youtube.com/",
             }
         };
