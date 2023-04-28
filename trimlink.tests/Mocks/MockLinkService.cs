@@ -1,6 +1,5 @@
 ﻿using Moq;
 using trimlink.core.Services;
-using trimlink.data.Repositories;
 
 namespace trimlink.tests.Mocks;
 

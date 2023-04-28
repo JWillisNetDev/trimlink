@@ -4,7 +4,6 @@ using trimlink.website.Contracts;
 using AutoMapper;
 using shortid;
 using shortid.Configuration;
-using trimlink.data.Repositories;
 using trimlink.core.Services;
 using trimlink.core.Records;
 

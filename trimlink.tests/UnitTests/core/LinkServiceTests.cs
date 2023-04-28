@@ -2,8 +2,8 @@
 using trimlink.core;
 using trimlink.core.Records;
 using trimlink.core.Services;
+using trimlink.data;
 using trimlink.data.Models;
-using trimlink.data.Repositories;
 using trimlink.tests.Mocks;
 
 namespace trimlink.tests.UnitTests.core;
@@ -13,30 +13,55 @@ public class LinkServiceTests
 {
     /// <summary>Do not directly access this field <i>(unless if you know what you're doing)</i>.<br />Use <see cref="linkService"/> instead.</summary>
     LinkService? _linkService = null;
-    LinkService linkService => _linkService ??= new LinkService(mockFactory.Object, mockGenerator.Object, mockValidator.Object);
+    LinkService linkService => _linkService ??= new LinkService(mockContext.Object, tokenGenerator, linkValidator);
 
-    Mock<IUnitOfWorkFactory> mockFactory;
-    Mock<ITokenGenerator> mockGenerator;
-    Mock<ILinkValidator> mockValidator;
+    Mock<TrimLinkDbContext> mockContext;
+    ITokenGenerator tokenGenerator;
+    ILinkValidator linkValidator;
 
     [SetUp]
     public void SetUp()
     {
-        mockFactory = MockUnitOfWorkFactory.GetMock();
-        mockGenerator = MockTokenGenerator.GetMock();
-        mockValidator = MockLinkValidator.GetMock();
+        List<Link> linksData = new()
+        {
+            new Link()
+            {
+                Id = 0,
+                UtcDateCreated = DateTime.Parse("2023-03-26 12:00:00.000"),
+                UtcDateExpires = DateTime.Parse("2024-03-26 12:00:00.000"),
+                IsNeverExpires = false,
+                IsMarkedForDeletion = false,
+                Token = "UZuMieEQHEha",
+                RedirectToUrl = @"https://www.google.com/"
+            },
+            new Link()
+            {
+                Id = 1,
+                UtcDateCreated = DateTime.Parse("2023-10-10 12:00:00.000"),
+                UtcDateExpires = DateTime.MaxValue,
+                IsNeverExpires = true,
+                IsMarkedForDeletion = false,
+                Token = "sVFwysRodYWB",
+                RedirectToUrl = @"https://www.youtube.com/"
+            }
+        };
+
+        mockContext = MockTrimLinkDbContext.GetMock(linksData);
+        tokenGenerator = new TestTokenGenerator();
+        linkValidator = new TestLinkValidator();
     }
 
     [TearDown]
     public void TearDown()
     {
+        _linkService?.Dispose();
         _linkService = null;
     }
 
     [Test]
     public void GenerateShortLink_GivenNoExpiration_ReturnsToken()
     {
-        const string expectedToken = "QYpEGR2fqg2z";
+        const string expectedToken = TestTokenGenerator.ExpectedToken;
         const string toUrl = "https://www.google.com/";
 
         int actualId = -1;
@@ -51,7 +76,7 @@ public class LinkServiceTests
     [Test]
     public void GenerateShortLink_GivenExpiration_ReturnsToken()
     {
-        const string expectedToken = "QYpEGR2fqg2z";
+        const string expectedToken = TestTokenGenerator.ExpectedToken;
         const string toUrl = "https://www.google.com/";
         TimeSpan expiresAfter = TimeSpan.FromDays(1);
 
@@ -67,11 +92,6 @@ public class LinkServiceTests
     [Test]
     public void GenerateShortLink_GivenInvalidLink_ThrowsArgumentException()
     {
-        mockValidator = new Mock<ILinkValidator>();
-
-        mockValidator.Setup(validator => validator.Validate(It.IsAny<string>()))
-            .Returns(LinkValidationResult.InvalidScheme);
-
         const int expectedId = -1;
         const string url = "some malformed url";
         int actualId = expectedId;

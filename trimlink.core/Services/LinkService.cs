@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using trimlink.data;
 using trimlink.data.Models;
-using trimlink.data.Repositories;
 using shortid;
 using Microsoft.EntityFrameworkCore;
 using trimlink.core.Records;
@@ -10,31 +9,30 @@ namespace trimlink.core.Services;
 
 public class LinkService : ILinkService, IDisposable
 {
-    //private readonly IUnitOfWorkFactory _unitOfWorkFactory;
-    private readonly Lazy<IUnitOfWork> _unitOfWork;
+    private readonly TrimLinkDbContext _context;
     private readonly ITokenGenerator _tokenGenerator;
     private readonly ILinkValidator _linkValidator;
 
     public LinkService(
-        IUnitOfWorkFactory unitOfWorkFactory,
+        TrimLinkDbContext context,
         ITokenGenerator tokenGenerator,
         ILinkValidator linkValidator
     )
     {
-        _unitOfWork = new Lazy<IUnitOfWork>(() => unitOfWorkFactory.CreateUnitOfWork(), true);
+        _context = context;
         _tokenGenerator = tokenGenerator;
         _linkValidator = linkValidator;
     }
 
-    public LinkService(IUnitOfWorkFactory unitOfWorkFactory, ITokenGenerator tokenGenerator) : this(unitOfWorkFactory, tokenGenerator, new DefaultLinkValidator())
+    public LinkService(TrimLinkDbContext context, ITokenGenerator tokenGenerator) : this(context, tokenGenerator, new DefaultLinkValidator())
     {
     }
 
-    public LinkService(IUnitOfWorkFactory unitOfWorkFactory, ILinkValidator linkValidator) : this(unitOfWorkFactory, new DefaultTokenGenerator(), linkValidator)
+    public LinkService(TrimLinkDbContext context, ILinkValidator linkValidator) : this(context, new DefaultTokenGenerator(), linkValidator)
     {
     }
 
-    public LinkService(IUnitOfWorkFactory unitOfWorkFactory) : this(unitOfWorkFactory, new DefaultTokenGenerator(), new DefaultLinkValidator())
+    public LinkService(TrimLinkDbContext context) : this(context, new DefaultTokenGenerator(), new DefaultLinkValidator())
     {
     }
 
@@ -77,8 +75,8 @@ public class LinkService : ILinkService, IDisposable
 
         Link link = CreateLink(toUrl, true, TimeSpan.Zero);
 
-        _unitOfWork.Value.Links.Add(link);
-        _unitOfWork.Value.Save();
+        _context.Links.Add(link);
+        _context.SaveChanges();
 
         id = link.Id;
         return link.Token;
@@ -90,8 +88,8 @@ public class LinkService : ILinkService, IDisposable
 
         Link link = CreateLink(toUrl, false, expiresAfter);
 
-        _unitOfWork.Value.Links.Add(link);
-        _unitOfWork.Value.Save();
+        _context.Links.Add(link);
+        _context.SaveChanges();
 
         id = link.Id;
         return link.Token;
@@ -99,19 +97,28 @@ public class LinkService : ILinkService, IDisposable
 
     public string? GetLongUrlById(int id)
     {
-        Link? found = _unitOfWork.Value.Links.Get(id);
+        Link? found = _context.Links
+            .AsNoTracking()
+            .SingleOrDefault(link => link.Id == id);
+
         return found?.RedirectToUrl;
     }
 
-    public string? GetLongUrlByToken(string shortId)
+    public string? GetLongUrlByToken(string token)
     {
-        Link? found = _unitOfWork.Value.Links.Find(link => link.Token == shortId);
+        Link? found = _context.Links
+            .AsNoTracking()
+            .SingleOrDefault(link => link.Token == token);
+
         return found?.RedirectToUrl;
     }
 
     public LinkDetails? GetLinkDetailsById(int id)
     {
-        Link? found = _unitOfWork.Value.Links.Get(id);
+        Link? found = _context.Links
+            .AsNoTracking()
+            .SingleOrDefault(link => link.Id == id);
+
         return found is null ?
             null :
             new LinkDetails(found);
@@ -119,7 +126,10 @@ public class LinkService : ILinkService, IDisposable
 
     public LinkDetails? GetLinkDetailsByToken(string token)
     {
-        Link? found = _unitOfWork.Value.Links.Find(link => link.Token == token);
+        Link? found = _context.Links
+            .AsNoTracking()
+            .SingleOrDefault(link => link.Token == token);
+
         return found is null ?
             null :
             new LinkDetails(found);
@@ -134,10 +144,7 @@ public class LinkService : ILinkService, IDisposable
 
         if (disposing)
         {
-            if (_unitOfWork.IsValueCreated &&
-                _unitOfWork.Value is IDisposable disposable)
-                disposable.Dispose();
-
+            _context.Dispose();
             _disposed = true;
         }
     }

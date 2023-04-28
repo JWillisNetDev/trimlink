@@ -5,9 +5,13 @@ namespace trimlink.data;
 
 public class TrimLinkDbContext : DbContext
 {
+    public TrimLinkDbContext() : base()
+    {
+    }
+
     public TrimLinkDbContext(DbContextOptions<TrimLinkDbContext> options) : base(options)
     {
     }
 
-    public DbSet<Link> Links => Set<Link>();
+    public virtual DbSet<Link> Links => Set<Link>();
 }

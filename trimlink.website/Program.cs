@@ -3,7 +3,6 @@ using trimlink.website.Configuration;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using shortid;
-using trimlink.data.Repositories;
 using trimlink.core.Services;
 using trimlink.website;
 using Serilog;
@@ -66,23 +65,19 @@ builder.Services.AddAutoMapper(config =>
 });
 
 // Inject our LinkService
-builder.Services.AddSingleton<ILinkService, LinkService>(sp =>
+builder.Services.AddScoped<ILinkService, LinkService>(sp =>
 {
-    UnitOfWorkFactory unitOfWorkFactory = new UnitOfWorkFactory(opts =>
-    {
-        if (builder.Environment.IsDevelopment())
-        {
-            opts.UseInMemoryDatabase("trimlink-devdb");
-        }
-        else if (builder.Environment.IsProduction())
-        {
-            opts.UseSqlServer();
-        }
-    });
+    DbContextOptions<TrimLinkDbContext> options = new DbContextOptionsBuilder<TrimLinkDbContext>()
+        .UseSqlServer("name=trimlinkdb")
+        .Options;
 
-    return new LinkService(unitOfWorkFactory);
+    TrimLinkDbContext context = new TrimLinkDbContext(options);
+    LinkService linkService = new LinkService(context);
+
+    return linkService;
 });
 
+// Add CORS
 builder.Services.AddCors();
 
 // TODO Add Authentication using jwt bearer authentication schema (maybe?)

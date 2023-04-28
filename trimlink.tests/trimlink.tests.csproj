@@ -28,7 +28,6 @@
 	  <None Remove="UnitTests\" />
 	  <None Remove="Mocks\" />
 	  <None Remove="UnitTests\website\" />
-	  <None Remove="UnitTests\data\" />
 	  <None Remove="UnitTests\core\" />
 	</ItemGroup>
 
@@ -36,7 +35,6 @@
 	  <Folder Include="UnitTests\" />
 	  <Folder Include="Mocks\" />
 	  <Folder Include="UnitTests\website\" />
-	  <Folder Include="UnitTests\data\" />
 	  <Folder Include="UnitTests\core\" />
 	</ItemGroup>
 </Project>

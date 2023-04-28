@@ -11,11 +11,9 @@
 
   <ItemGroup>
     <None Remove="Models\" />
-    <None Remove="Repositories\" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Models\" />
-    <Folder Include="Repositories\" />
   </ItemGroup>
 </Project>
