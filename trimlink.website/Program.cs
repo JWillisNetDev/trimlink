@@ -52,18 +52,15 @@ builder.Services.AddAutoMapper(config =>
     config.AddProfile<MappingProfile>();
 });
 
-// Inject our LinkService
-builder.Services.AddScoped<ILinkService, LinkService>(_ =>
+// Inject our TrimLinkDbContext as a scoped service
+builder.Services.AddDbContext<TrimLinkDbContext>(options =>
 {
-    DbContextOptions<TrimLinkDbContext> options = new DbContextOptionsBuilder<TrimLinkDbContext>()
-        .UseSqlServer("name=trimlinkdb")
-        .Options;
-
-    TrimLinkDbContext context = new TrimLinkDbContext(options);
-    LinkService linkService = new LinkService(context);
-
-    return linkService;
+    options.UseSqlServer(builder.Configuration.GetConnectionString("defaultConnection"),
+        config => config.MigrationsAssembly("trimlink.data"));
 });
+
+// Inject our LinkService
+builder.Services.AddScoped<ILinkService, LinkService>();
 
 // Add CORS
 builder.Services.AddCors();
@@ -71,6 +68,13 @@ builder.Services.AddCors();
 // TODO Add Authentication using jwt bearer authentication schema (maybe?)
 
 var app = builder.Build();
+
+// Create a scope to apply our database migrations.
+using (var service = app.Services.CreateScope())
+{
+    await using var context = service.ServiceProvider.GetRequiredService<TrimLinkDbContext>();
+    await context.Database.MigrateAsync();
+}
 
 app.UseStaticFiles();
 

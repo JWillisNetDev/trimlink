@@ -30,13 +30,13 @@ public sealed class LinksController : Controller
 
         _logger.LogInformation("Generated {token} redirect to {url}", token, linkCreate.RedirectToUrl);
 
-        return Created(Url.Link("RedirectTo", new { token }) ?? string.Empty, token);
+        return Created($"/api/links/{token}", token);
     }
 
-    [HttpGet("{token}", Name = "RedirectTo")]
+    [HttpGet("{token}", Name = "GetLinkRedirect")]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-    public IActionResult RedirectFromLink([FromRoute] string token)
+    public IActionResult GetLinkRedirect([FromRoute] string token)
     {
         string? toUrl = _linkService.GetLongUrlByToken(token);
 

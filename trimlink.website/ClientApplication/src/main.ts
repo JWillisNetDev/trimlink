@@ -8,11 +8,23 @@ import '@mdi/font/css/materialdesignicons.css'
 // Vue Router
 import { createRouter, createWebHistory } from 'vue-router'
 
+import axios from 'axios'
+
 const routes = [
   {
     name: 'home',
     path: '/',
     component: () => import('@/views/TheHome.vue')
+  },
+  {
+    name: 'RedirectTo',
+    path: '/to/:token',
+    redirect: async (to: any) => {
+      const redirectTo = await axios.get(`/api/links/${to.params.token}`)
+          .then(resp => resp.data)
+      window.location.href = redirectTo
+      return { name: 'home' }
+    }
   },
   {
     name: 'notfound',

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
+import type { Ref } from 'vue'
 import { TimeIncrement } from '@/types/TimeIncrement'
 import { LinkCreateForm } from '@/types/LinkCreateForm'
 import { Duration } from 'ts-luxon'
@@ -17,35 +18,45 @@ const formData = reactive(new LinkCreateForm())
 const expiresIn = ref(0)
 const expiresInIncrement = ref(TimeIncrement.Minutes)
 
+const shouldShowSnackbar = ref(false)
+const link: Ref<string> = ref('')
+
 async function submit() {
-  if (!formData.isNeverExpires) {
-    const format = 'ddd.hh:mm:ss.SSS'
-    switch (expiresInIncrement.value) {
-      case TimeIncrement.Minutes:
-        formData.duration = Duration.fromObject({ minutes: expiresIn.value }).toFormat(format) || ''
-        break
-      case TimeIncrement.Hours:
-        formData.duration = Duration.fromObject({ hours: expiresIn.value }).toFormat(format) || ''
-        break
-      case TimeIncrement.Days:
-        formData.duration = Duration.fromObject({ days: expiresIn.value }).toFormat(format) || ''
-        break
+    if (!formData.isNeverExpires) {
+      const format = 'ddd.hh:mm:ss.SSS'
+      switch (expiresInIncrement.value) {
+        case TimeIncrement.Minutes:
+          formData.duration = Duration.fromObject({ minutes: expiresIn.value }).toFormat(format) || ''
+          break
+        case TimeIncrement.Hours:
+          formData.duration = Duration.fromObject({ hours: expiresIn.value }).toFormat(format) || ''
+          break
+        case TimeIncrement.Days:
+          formData.duration = Duration.fromObject({ days: expiresIn.value }).toFormat(format) || ''
+          break
+      }
     }
-    console.log(formData.duration)
-  }
-  axios({
-    method: 'post',
-    url: '/api/links',
-    data: formData,
-    withCredentials: false,
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }).catch((err) => console.log(err))
+    
+    link.value = await axios.post('/api/links', formData)
+      .then(response => {
+          console.log(response.data)
+          return response.data
+      })
+      .catch(error => console.log(error))
+    
+    shouldShowSnackbar.value = true
 }
 </script>
 
 <template>
+  <v-snackbar color="primary" v-model="shouldShowSnackbar">
+    Link created at <a v-if="link" :href="`/to/${link}`">{{ link }}</a>!
+    
+    <template v-slot:actions>
+      <v-btn color="secondary" icon="mdi-content-copy" @click="() => navigator.clipboard.writeText(`${window.location.origin}/to/${link}`)" />
+      <v-btn color="secondary" icon="mdi-close-box" @click="() => shouldShowSnackbar = false" />
+    </template>
+  </v-snackbar>
   <v-form>
     <v-container>
       <v-row justify="center">

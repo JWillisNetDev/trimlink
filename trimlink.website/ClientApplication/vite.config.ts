@@ -27,7 +27,6 @@ export default defineConfig({
         changeOrigin: false,
         secure: false,
       },
-      '/to': { target: 'https://localhost:7295', secure: false }
     },
   }
 })
