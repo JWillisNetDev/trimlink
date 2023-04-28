@@ -6,7 +6,7 @@ namespace trimlink.core;
 public class DefaultTokenGenerator : ITokenGenerator
 {
     private GenerationOptions GetOptions()
-        => new GenerationOptions(useNumbers: UseNumbers, useSpecialCharacters: UseSpecialCharacters, length: Length);
+        => new(useNumbers: UseNumbers, useSpecialCharacters: UseSpecialCharacters, length: Length);
 
     public bool UseNumbers { get; set; }
     public bool UseSpecialCharacters { get; set; }

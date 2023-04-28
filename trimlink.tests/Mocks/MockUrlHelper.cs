@@ -3,7 +3,7 @@ using Moq;
 
 namespace trimlink.tests.Mocks;
 
-internal class MockUrlHelper
+internal static class MockUrlHelper
 {
     public static Mock<IUrlHelper> GetMock()
     {

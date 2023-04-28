@@ -1,7 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using trimlink.data;
+﻿using trimlink.data;
 using trimlink.data.Models;
-using shortid;
 using Microsoft.EntityFrameworkCore;
 using trimlink.core.Records;
 
@@ -57,7 +55,7 @@ public class LinkService : ILinkService, IDisposable
 
     private void HandleLinkValidation(string toUrl)
     {
-        ArgumentNullException.ThrowIfNullOrEmpty(toUrl);
+        ArgumentException.ThrowIfNullOrEmpty(toUrl);
         LinkValidationResult result = _linkValidator.Validate(toUrl);
         if (result == LinkValidationResult.InvalidScheme)
         {
@@ -73,7 +71,7 @@ public class LinkService : ILinkService, IDisposable
     {
         HandleLinkValidation(toUrl);
 
-        Link link = CreateLink(toUrl, true, TimeSpan.Zero);
+        Link link = CreateLink(toUrl);
 
         _context.Links.Add(link);
         _context.SaveChanges();

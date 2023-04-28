@@ -41,7 +41,7 @@ public class Link
     public string Token { get; set; } = string.Empty;
 
     /// <summary>
-    /// The URL to redirect to when visiting the fully-qualified <see cref="Link.TrimmedUrl"/>.
+    /// The URL to redirect to.
     /// </summary>
     public string RedirectToUrl { get; set; } = string.Empty;
 }

@@ -3,10 +3,10 @@ using trimlink.core.Services;
 
 namespace trimlink.tests.Mocks;
 
-public class MockLinkService
+internal static class MockLinkService
 {
-    const string ExpectedToken = "uqsynBwWfNuv";
-    const string ExpectedLongUrl = "https://www.google.com/";
+    public const string ExpectedToken = "uqsynBwWfNuv";
+    public const string ExpectedLongUrl = "https://www.google.com/";
 
     public static Mock<ILinkService> GetMock()
     {

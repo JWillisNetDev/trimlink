@@ -5,7 +5,7 @@ namespace trimlink.data;
 
 public class TrimLinkDbContext : DbContext
 {
-    public TrimLinkDbContext() : base()
+    public TrimLinkDbContext()
     {
     }
 

@@ -1,10 +1,8 @@
-﻿using System.Text.Json.Serialization;
-
-namespace trimlink.website.Contracts;
+﻿namespace trimlink.website.Contracts;
 
 public class LinkCreateDto
 {
-    public string RedirectToUrl { get; set; } = string.Empty;
-    public TimeSpan Duration { get; set; } = TimeSpan.Zero;
-    public bool IsNeverExpires { get; set; } = false;
+    public string RedirectToUrl { get; init; } = string.Empty;
+    public TimeSpan Duration { get; init; } = TimeSpan.Zero;
+    public bool IsNeverExpires { get; init; }
 }

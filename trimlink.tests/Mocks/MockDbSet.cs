@@ -3,7 +3,7 @@ using Moq;
 
 namespace trimlink.tests.Mocks;
 
-internal class MockDbSet
+internal static class MockDbSet
 {
     public static Mock<DbSet<TEntity>> GetMock<TEntity>(IEnumerable<TEntity> data)
         where TEntity : class

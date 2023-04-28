@@ -15,24 +15,29 @@ namespace trimlink.tests.UnitTests.website;
 [TestFixture]
 public class LinksControllerTests
 {
-    IMapper mapper;
-    Mock<ILogger<LinksController>> mockLogger;
-    Mock<ILinkService> mockLinkService;
-    Mock<IUrlHelper> mockUrlHelper;
-    LinksController controller;
-
+    // Disables no-default-values warnings.
+    #pragma warning disable CS8618
+    
+    private IMapper _mapper;
+    private Mock<ILogger<LinksController>> _mockLogger;
+    private Mock<ILinkService> _mockLinkService;
+    private Mock<IUrlHelper> _mockUrlHelper;
+    private LinksController _controller;
+    
+    #pragma warning restore CS8618
+    
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
         MapperConfiguration config = new(cfg => cfg.AddProfile<MappingProfile>());
-        mapper = new Mapper(config);
+        _mapper = new Mapper(config);
 
-        mockLogger = new Mock<ILogger<LinksController>>();
-        mockLinkService = MockLinkService.GetMock();
-        mockUrlHelper = MockUrlHelper.GetMock();
+        _mockLogger = new Mock<ILogger<LinksController>>();
+        _mockLinkService = MockLinkService.GetMock();
+        _mockUrlHelper = MockUrlHelper.GetMock();
 
-        controller = new LinksController(mockLogger.Object, mapper, mockLinkService.Object);
-        controller.Url = mockUrlHelper.Object;
+        _controller = new LinksController(_mockLogger.Object, _mapper, _mockLinkService.Object);
+        _controller.Url = _mockUrlHelper.Object;
     }
 
     [Test]
@@ -45,7 +50,7 @@ public class LinksControllerTests
             IsNeverExpires = false,
         };
 
-        ObjectResult? actual = controller.CreateLink(linkCreate) as ObjectResult;
+        ObjectResult? actual = _controller.CreateLink(linkCreate) as ObjectResult;
 
         Assert.That(actual, Is.Not.Null);
         Assert.That(actual, Is.AssignableFrom<CreatedResult>());

@@ -3,6 +3,6 @@
 public enum LinkValidationResult
 {
     Valid,
-    InvalidScheme, InvalidRelative,
+    InvalidScheme, InvalidRelative
 }
 

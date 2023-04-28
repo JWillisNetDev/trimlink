@@ -1,35 +1,23 @@
 ﻿using trimlink.data;
 using trimlink.website.Configuration;
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using shortid;
 using trimlink.core.Services;
-using trimlink.website;
 using Serilog;
-using Serilog.AspNetCore;
 
-// Configure Serilog immediately to enable logging during the configuration portion of application lifetime
-using ILogger = Serilog.ILogger;
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-IConfiguration config = new ConfigurationBuilder()
-    .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("appsettings.json")
-    .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development"}.json")
-    .Build();
-
+// Setup Serilog logger
 Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(config)
+    .ReadFrom.Configuration(builder.Configuration)
     .CreateLogger();
 
-var builder = WebApplication.CreateBuilder(args);
-
 // Create our CORS policy
-const string _MyAllowFrontend = "MyAllowFrontend";
+const string myAllowFrontend = "myAllowFrontend";
 
-builder.Services.AddCors(options =>
+builder.Services.AddCors(config =>
 {
     if (builder.Environment.IsDevelopment())
-        options.AddPolicy(_MyAllowFrontend, options =>
+        config.AddPolicy(myAllowFrontend, options =>
         {
             options
                 .AllowAnyHeader()
@@ -37,7 +25,7 @@ builder.Services.AddCors(options =>
                 .AllowAnyOrigin();
         });
     else
-        options.AddPolicy(_MyAllowFrontend, options =>
+        config.AddPolicy(myAllowFrontend, options =>
         {
             options
                 .WithOrigins("https://localhost:5173")
@@ -47,7 +35,7 @@ builder.Services.AddCors(options =>
     
 });
 
-// Add SeriLog for logging to file (prod) and terminal (dev)
+// Add Serilog for logging to file (prod) and terminal (dev)
 builder.Host.UseSerilog();
 
 // Add services to the container.
@@ -65,7 +53,7 @@ builder.Services.AddAutoMapper(config =>
 });
 
 // Inject our LinkService
-builder.Services.AddScoped<ILinkService, LinkService>(sp =>
+builder.Services.AddScoped<ILinkService, LinkService>(_ =>
 {
     DbContextOptions<TrimLinkDbContext> options = new DbContextOptionsBuilder<TrimLinkDbContext>()
         .UseSqlServer("name=trimlinkdb")
@@ -98,7 +86,7 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
-app.UseCors(_MyAllowFrontend);
+app.UseCors(myAllowFrontend);
 
 app.MapFallbackToFile("index.html");
 

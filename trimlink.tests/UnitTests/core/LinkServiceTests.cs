@@ -5,20 +5,27 @@ using trimlink.core.Services;
 using trimlink.data;
 using trimlink.data.Models;
 using trimlink.tests.Mocks;
+// ReSharper disable HeapView.BoxingAllocation
+// ReSharper disable StringLiteralTypo
 
 namespace trimlink.tests.UnitTests.core;
 
 [TestFixture]
 public class LinkServiceTests
 {
-    /// <summary>Do not directly access this field <i>(unless if you know what you're doing)</i>.<br />Use <see cref="linkService"/> instead.</summary>
-    LinkService? _linkService = null;
-    LinkService linkService => _linkService ??= new LinkService(mockContext.Object, tokenGenerator, linkValidator);
-
-    Mock<TrimLinkDbContext> mockContext;
-    ITokenGenerator tokenGenerator;
-    ILinkValidator linkValidator;
-
+    /// <summary>Do not directly access this field <i>(unless if you know what you're doing)</i>.<br />Use <see cref="LinkService"/> instead.</summary>
+    private LinkService? _linkService;
+    private LinkService LinkService => _linkService ??= new LinkService(_mockContext.Object, _tokenGenerator, _linkValidator);
+    
+    // Disables no-default-values warnings
+    #pragma warning disable CS8618
+    
+    Mock<TrimLinkDbContext> _mockContext;
+    ITokenGenerator _tokenGenerator;
+    ILinkValidator _linkValidator;
+    
+    #pragma warning restore CS8618
+    
     [SetUp]
     public void SetUp()
     {
@@ -46,9 +53,9 @@ public class LinkServiceTests
             }
         };
 
-        mockContext = MockTrimLinkDbContext.GetMock(linksData);
-        tokenGenerator = new TestTokenGenerator();
-        linkValidator = new TestLinkValidator();
+        _mockContext = MockTrimLinkDbContext.GetMock(linksData);
+        _tokenGenerator = new TestTokenGenerator();
+        _linkValidator = new TestLinkValidator();
     }
 
     [TearDown]
@@ -64,13 +71,14 @@ public class LinkServiceTests
         const string expectedToken = TestTokenGenerator.ExpectedToken;
         const string toUrl = "https://www.google.com/";
 
-        int actualId = -1;
+        string actualToken = LinkService.GenerateShortLink(toUrl, out int actualId);
 
-        string actualToken = linkService.GenerateShortLink(toUrl, out actualId);
-
-        Assert.That(actualId, Is.GreaterThanOrEqualTo(0));
-        Assert.That(actualToken, Is.Not.Null.Or.Empty);
-        Assert.That(actualToken, Is.EqualTo(expectedToken));
+        Assert.Multiple(() =>
+        {
+            Assert.That(actualId, Is.AtLeast(0));
+            Assert.That(actualToken, Is.Not.Null.Or.Empty);
+            Assert.That(actualToken, Is.EqualTo(expectedToken));
+        });
     }
 
     [Test]
@@ -80,13 +88,13 @@ public class LinkServiceTests
         const string toUrl = "https://www.google.com/";
         TimeSpan expiresAfter = TimeSpan.FromDays(1);
 
-        int actualId = -1;
-
-        string actualToken = linkService.GenerateShortLink(toUrl, expiresAfter, out actualId);
-
-        Assert.That(actualId, Is.GreaterThanOrEqualTo(0));
-        Assert.That(actualToken, Is.Not.Null.Or.Empty);
-        Assert.That(actualToken, Is.EqualTo(expectedToken));
+        string actualToken = LinkService.GenerateShortLink(toUrl, expiresAfter, out int actualId);
+        
+        Assert.Multiple(() => {
+            Assert.That(actualId, Is.AtLeast(0));
+            Assert.That(actualToken, Is.Not.Null.Or.Empty);
+            Assert.That(actualToken, Is.EqualTo(expectedToken));
+        });
     }
 
     [Test]
@@ -98,7 +106,7 @@ public class LinkServiceTests
 
         Assert.Throws<ArgumentException>(() =>
         {
-            linkService.GenerateShortLink(url, out actualId);
+            LinkService.GenerateShortLink(url, out actualId);
         });
         Assert.That(actualId, Is.EqualTo(expectedId));
     }
@@ -112,7 +120,7 @@ public class LinkServiceTests
 
         Assert.Throws<ArgumentNullException>(() =>
         {
-            linkService.GenerateShortLink(url, out actualId);
+            LinkService.GenerateShortLink(url!, out actualId);
         });
         Assert.That(actualId, Is.EqualTo(expectedId));
     }
@@ -126,9 +134,20 @@ public class LinkServiceTests
 
         Assert.Throws<ArgumentException>(() =>
         {
-            linkService.GenerateShortLink(url, out actualId);
+            LinkService.GenerateShortLink(url, out actualId);
         });
         Assert.That(actualId, Is.EqualTo(expectedId));
+    }
+
+    [Test]
+    public void GenerateShortLink_GivenInvalidRelative_ThrowsLinkValidationException()
+    {
+        const string url = "/this/is/relative";
+
+        Assert.Throws<ArgumentException>(() =>
+        {
+            LinkService.GenerateShortLink(url, out int _);
+        });
     }
 
     [Test]
@@ -137,7 +156,7 @@ public class LinkServiceTests
         const int id = 1;
         const string expectedUrl = "https://www.youtube.com/";
 
-        string? actualUrl = linkService.GetLongUrlById(id);
+        string? actualUrl = LinkService.GetLongUrlById(id);
 
         Assert.That(actualUrl, Is.Not.Null.Or.Empty);
         Assert.That(actualUrl, Is.EqualTo(expectedUrl));
@@ -148,7 +167,7 @@ public class LinkServiceTests
     {
         const int id = 42_1337;
 
-        string? actualUrl = linkService.GetLongUrlById(id);
+        string? actualUrl = LinkService.GetLongUrlById(id);
 
         Assert.That(actualUrl, Is.Null);
     }
@@ -159,7 +178,7 @@ public class LinkServiceTests
         const string token = "UZuMieEQHEha";
         const string expectedUrl = "https://www.google.com/";
 
-        string? actualUrl = linkService.GetLongUrlByToken(token);
+        string? actualUrl = LinkService.GetLongUrlByToken(token);
 
         Assert.That(actualUrl, Is.Not.Null.Or.Empty);
         Assert.That(actualUrl, Is.EqualTo(expectedUrl));
@@ -170,7 +189,7 @@ public class LinkServiceTests
     {
         const string token = "hello, world!";
 
-        string? actualUrl = linkService.GetLongUrlByToken(token);
+        string? actualUrl = LinkService.GetLongUrlByToken(token);
 
         Assert.That(actualUrl, Is.Null);
     }
@@ -180,10 +199,10 @@ public class LinkServiceTests
     {
         const int expectedId = 0;
 
-        LinkDetails? actual = linkService.GetLinkDetailsById(expectedId);
+        LinkDetails? actual = LinkService.GetLinkDetailsById(expectedId);
 
         Assert.That(actual, Is.Not.Null);
-        Assert.That(actual.Id, Is.EqualTo(expectedId));
+        Assert.That(actual?.Id, Is.EqualTo(expectedId));
     }
 
     [Test]
@@ -191,7 +210,7 @@ public class LinkServiceTests
     {
         const int expectedId = 42;
 
-        LinkDetails? actual = linkService.GetLinkDetailsById(expectedId);
+        LinkDetails? actual = LinkService.GetLinkDetailsById(expectedId);
 
         Assert.That(actual, Is.Null);
     }
@@ -201,10 +220,10 @@ public class LinkServiceTests
     {
         const string expectedToken = "UZuMieEQHEha";
 
-        LinkDetails? actual = linkService.GetLinkDetailsByToken(expectedToken);
+        LinkDetails? actual = LinkService.GetLinkDetailsByToken(expectedToken);
 
         Assert.That(actual, Is.Not.Null);
-        Assert.That(actual.Token, Is.EqualTo(expectedToken));
+        Assert.That(actual?.Token, Is.EqualTo(expectedToken));
     }
 
     [Test]
@@ -212,7 +231,7 @@ public class LinkServiceTests
     {
         const string expectedToken = "inigo montoya";
 
-        LinkDetails? actual = linkService.GetLinkDetailsByToken(expectedToken);
+        LinkDetails? actual = LinkService.GetLinkDetailsByToken(expectedToken);
 
         Assert.That(actual, Is.Null);
     }
