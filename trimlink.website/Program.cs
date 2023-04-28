@@ -74,8 +74,7 @@ builder.Services.AddSingleton<ILinkService, LinkService>(sp =>
         {
             opts.UseInMemoryDatabase("trimlink-devdb");
         }
-
-        if (builder.Environment.IsProduction())
+        else if (builder.Environment.IsProduction())
         {
             opts.UseSqlServer();
         }

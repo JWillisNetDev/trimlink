@@ -5,7 +5,8 @@ namespace trimlink.data.Repositories;
 
 internal class Repository<TContext, TEntity, TKey> : IRepository<TEntity, TKey>, IDisposable
     where TContext : DbContext
-    where TEntity : class
+    where TEntity : class, IEntity<TKey>
+    where TKey : IEquatable<TKey>
 {
     private readonly TContext _dbContext;
 

@@ -1,12 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using trimlink.data.Repositories;
 
 namespace trimlink.data.Models;
 
 [Index(nameof(Token), Name = "UX_Links_Token", IsUnique = true)]
 [Index(nameof(UtcDateExpires), Name = "IX_Links_UtcDateExpires")]
-public class Link
+public class Link : IEntity<int>
 {
     /// <summary>
     /// The private ID.

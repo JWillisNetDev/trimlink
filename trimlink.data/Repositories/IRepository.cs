@@ -1,9 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿namespace trimlink.data.Repositories;
 
-namespace trimlink.data.Repositories;
-
-public interface IRepository<TEntity, TKey> : IDisposable
-    where TEntity : class
+public interface IRepository<TEntity, in TKey> : IDisposable
+    where TEntity : IEntity<TKey>
+    where TKey : IEquatable<TKey>
 {
     TEntity? Get(TKey id);
     IEnumerable<TEntity> GetAll();
