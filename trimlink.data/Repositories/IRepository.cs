@@ -1,6 +1,6 @@
 ﻿namespace trimlink.data.Repositories;
 
-public interface IRepository<TEntity, in TKey> : IDisposable
+public interface IRepository<TEntity, in TKey>
     where TEntity : IEntity<TKey>
     where TKey : IEquatable<TKey>
 {

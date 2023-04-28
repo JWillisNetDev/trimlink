@@ -8,9 +8,10 @@ using trimlink.core.Records;
 
 namespace trimlink.core.Services;
 
-public class LinkService : ILinkService
+public class LinkService : ILinkService, IDisposable
 {
-    private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+    //private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+    private readonly Lazy<IUnitOfWork> _unitOfWork;
     private readonly ITokenGenerator _tokenGenerator;
     private readonly ILinkValidator _linkValidator;
 
@@ -20,7 +21,7 @@ public class LinkService : ILinkService
         ILinkValidator linkValidator
     )
     {
-        _unitOfWorkFactory = unitOfWorkFactory;
+        _unitOfWork = new Lazy<IUnitOfWork>(() => unitOfWorkFactory.CreateUnitOfWork(), true);
         _tokenGenerator = tokenGenerator;
         _linkValidator = linkValidator;
     }
@@ -56,9 +57,6 @@ public class LinkService : ILinkService
     private Link CreateLink(string toUrl)
         => CreateLink(toUrl, true, TimeSpan.Zero);
 
-    private IUnitOfWork CreateUnitOfWork()
-        => _unitOfWorkFactory.CreateUnitOfWork();
-
     private void HandleLinkValidation(string toUrl)
     {
         ArgumentNullException.ThrowIfNullOrEmpty(toUrl);
@@ -79,9 +77,8 @@ public class LinkService : ILinkService
 
         Link link = CreateLink(toUrl, true, TimeSpan.Zero);
 
-        using IUnitOfWork unitOfWork = CreateUnitOfWork();
-        unitOfWork.Links.Add(link);
-        unitOfWork.Save();
+        _unitOfWork.Value.Links.Add(link);
+        _unitOfWork.Value.Save();
 
         id = link.Id;
         return link.Token;
@@ -93,9 +90,8 @@ public class LinkService : ILinkService
 
         Link link = CreateLink(toUrl, false, expiresAfter);
 
-        using IUnitOfWork unitOfWork = CreateUnitOfWork();
-        unitOfWork.Links.Add(link);
-        unitOfWork.Save();
+        _unitOfWork.Value.Links.Add(link);
+        _unitOfWork.Value.Save();
 
         id = link.Id;
         return link.Token;
@@ -103,22 +99,19 @@ public class LinkService : ILinkService
 
     public string? GetLongUrlById(int id)
     {
-        using IUnitOfWork unitOfWork = CreateUnitOfWork();
-        Link? found = unitOfWork.Links.Get(id);
+        Link? found = _unitOfWork.Value.Links.Get(id);
         return found?.RedirectToUrl;
     }
 
     public string? GetLongUrlByToken(string shortId)
     {
-        using IUnitOfWork unitOfWork = CreateUnitOfWork();
-        Link? found = unitOfWork.Links.Find(link => link.Token == shortId);
+        Link? found = _unitOfWork.Value.Links.Find(link => link.Token == shortId);
         return found?.RedirectToUrl;
     }
 
     public LinkDetails? GetLinkDetailsById(int id)
     {
-        using IUnitOfWork unitOfWork = CreateUnitOfWork();
-        Link? found = unitOfWork.Links.Get(id);
+        Link? found = _unitOfWork.Value.Links.Get(id);
         return found is null ?
             null :
             new LinkDetails(found);
@@ -126,10 +119,34 @@ public class LinkService : ILinkService
 
     public LinkDetails? GetLinkDetailsByToken(string token)
     {
-        using IUnitOfWork unitOfWork = CreateUnitOfWork();
-        Link? found = unitOfWork.Links.Find(link => link.Token == token);
+        Link? found = _unitOfWork.Value.Links.Find(link => link.Token == token);
         return found is null ?
             null :
             new LinkDetails(found);
     }
+
+    #region Implements IDisposable
+    private bool _disposed;
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed)
+            return;
+
+        if (disposing)
+        {
+            if (_unitOfWork.IsValueCreated &&
+                _unitOfWork.Value is IDisposable disposable)
+                disposable.Dispose();
+
+            _disposed = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+    #endregion
 }

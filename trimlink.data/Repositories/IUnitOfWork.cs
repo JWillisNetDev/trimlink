@@ -2,7 +2,7 @@
 
 namespace trimlink.data.Repositories;
 
-public interface IUnitOfWork : IDisposable
+public interface IUnitOfWork
 {
     IRepository<Link, int> Links { get; }
 

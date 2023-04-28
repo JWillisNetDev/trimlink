@@ -13,9 +13,9 @@ public class UnitOfWork : IUnitOfWork, IDisposable
     }
 
     private Repository<TrimLinkDbContext, Link, int>? _linkRepository;
-    public IRepository<Link, int> Links => _linkRepository ??= new Repository<TrimLinkDbContext, Link, int>(_dbContext);
+    public virtual IRepository<Link, int> Links => _linkRepository ??= new Repository<TrimLinkDbContext, Link, int>(_dbContext);
 
-    public void Save()
+    public virtual void Save()
     {
         _dbContext.SaveChanges();
     }

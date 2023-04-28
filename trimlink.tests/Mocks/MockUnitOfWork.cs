@@ -35,6 +35,7 @@ internal class MockUnitOfWork
             }
         });
 
+
         mock.Setup(work => work.Links)
             .Returns(() => mockLinkRepository.Object);
 
