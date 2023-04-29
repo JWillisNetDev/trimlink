@@ -55,7 +55,9 @@ builder.Services.AddAutoMapper(config =>
 // Inject our TrimLinkDbContext as a scoped service
 builder.Services.AddDbContext<TrimLinkDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("defaultConnection"),
+    options.UseSqlServer(builder
+            .Configuration
+            .GetConnectionString("defaultConnection"),
         config => config.MigrationsAssembly("trimlink.data"));
 });
 
