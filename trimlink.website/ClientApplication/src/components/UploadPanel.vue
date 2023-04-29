@@ -4,7 +4,10 @@ import type { Ref } from 'vue'
 import { TimeIncrement } from '@/types/TimeIncrement'
 import { LinkCreateForm } from '@/types/LinkCreateForm'
 import { Duration } from 'ts-luxon'
+import useClipboard from 'vue-clipboard3'
 import axios from 'axios'
+
+const { toClipboard } = useClipboard() 
 
 const timeIncrements = [
   TimeIncrement.Minutes,
@@ -46,6 +49,10 @@ async function submit() {
     
     shouldShowSnackbar.value = true
 }
+
+function getUrl(url?: string): string {
+    return `${window.location.origin}/${url || ''}`
+}
 </script>
 
 <template>
@@ -53,7 +60,7 @@ async function submit() {
     Link created at <a v-if="link" :href="`/to/${link}`">{{ link }}</a>!
     
     <template v-slot:actions>
-      <v-btn color="secondary" icon="mdi-content-copy" @click="() => navigator.clipboard.writeText(`${window.location.origin}/to/${link}`)" />
+      <v-btn color="secondary" icon="mdi-content-copy" @click="async () => await toClipboard(getUrl(`to/${link}`))" />
       <v-btn color="secondary" icon="mdi-close-box" @click="() => shouldShowSnackbar = false" />
     </template>
   </v-snackbar>

@@ -7,31 +7,9 @@ import '@mdi/font/css/materialdesignicons.css'
 
 // Vue Router
 import { createRouter, createWebHistory } from 'vue-router'
+import router from '@/router'
 
 import axios from 'axios'
-
-const routes = [
-  {
-    name: 'home',
-    path: '/',
-    component: () => import('@/views/TheHome.vue')
-  },
-  {
-    name: 'RedirectTo',
-    path: '/to/:token',
-    redirect: async (to: any) => {
-      const redirectTo = await axios.get(`/api/links/${to.params.token}`)
-          .then(resp => resp.data)
-      window.location.href = redirectTo
-      return { name: 'home' }
-    }
-  },
-  {
-    name: 'notfound',
-    path: '/:pathMatch(.*)*', // https://router.vuejs.org/guide/migration/#removed-star-or-catch-all-routes
-    component: () => import('@/views/NotFound.vue')
-  }
-]
 
 // Vuetify setup
 import 'vuetify/styles'
@@ -48,11 +26,6 @@ const vuetify = createVuetify({
       mdi
     }
   }
-})
-
-const router = createRouter({
-  history: createWebHistory(),
-  routes
 })
 
 createApp(App).use(vuetify).use(router).mount('#app')
