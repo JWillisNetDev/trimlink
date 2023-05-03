@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-import type { Ref } from 'vue'
-import { TimeIncrement } from '@/types/TimeIncrement'
-import { LinkCreateForm } from '@/types/LinkCreateForm'
-import { Duration } from 'ts-luxon'
+import {reactive, ref, computed} from 'vue'
+import {TimeIncrement} from '@/types/TimeIncrement'
+import {Duration} from 'ts-luxon'
+import LinkService from '@/services/LinkService'
 import useClipboard from 'vue-clipboard3'
-import axios from 'axios'
 
 const { toClipboard } = useClipboard() 
 
@@ -16,52 +14,61 @@ const timeIncrements = [
   TimeIncrement.Weeks
 ]
 
-const formData = reactive(new LinkCreateForm())
-
-const expiresIn = ref(0)
-const expiresInIncrement = ref(TimeIncrement.Minutes)
-
-const shouldShowSnackbar = ref(false)
-const link: Ref<string> = ref('')
-
-async function submit() {
-    if (!formData.isNeverExpires) {
-      const format = 'ddd.hh:mm:ss.SSS'
-      switch (expiresInIncrement.value) {
-        case TimeIncrement.Minutes:
-          formData.duration = Duration.fromObject({ minutes: expiresIn.value }).toFormat(format) || ''
-          break
-        case TimeIncrement.Hours:
-          formData.duration = Duration.fromObject({ hours: expiresIn.value }).toFormat(format) || ''
-          break
-        case TimeIncrement.Days:
-          formData.duration = Duration.fromObject({ days: expiresIn.value }).toFormat(format) || ''
-          break
-      }
-    }
-    
-    link.value = await axios.post('/api/links', formData)
-      .then(response => {
-          console.log(response.data)
-          return response.data
-      })
-      .catch(error => console.log(error))
-    
-    shouldShowSnackbar.value = true
+interface Form {
+    url: string,
+    timeValue: number,
+    timeInterval: TimeIncrement,
+    neverExpires: boolean
 }
 
-function getUrl(url?: string): string {
-    return `${window.location.origin}/${url || ''}`
+const formData = reactive<Form>({
+    url: '',
+    timeValue: 0,
+    timeInterval: TimeIncrement.Minutes,
+    neverExpires: false
+})
+
+const expiresIn = ref<number>(0)
+const expiresInIncrement = ref<TimeIncrement>(TimeIncrement.Minutes)
+const shouldShowSnackbar = ref<boolean>(false)
+const link = ref<string>()
+const fullUrl = computed(() => `${window.location.origin}/to/${link.value}`)
+
+async function submit() {
+    if (formData.neverExpires) {
+        link.value = await LinkService.createLink(formData.url) ?? ''
+    }
+    else {
+        let duration: string = '';
+        const format = 'ddd.hh:mm:ss.SSS'
+        switch (formData.timeInterval) {
+            case TimeIncrement.Minutes:
+                duration = `0.00:${formData.timeValue}:00.000`
+                break
+            case TimeIncrement.Hours:
+                duration = `0.${formData.timeValue}:00:00.000`
+                break
+            case TimeIncrement.Days:
+                duration = `${formData.timeValue}.00:00:00.000`
+                break
+            case TimeIncrement.Weeks:
+                duration = `${formData.timeValue * 7}.00:00:00.000`
+                break
+        }
+        link.value = await LinkService.createLinkExpires(formData.url, duration) ?? ''
+    }
+    if (link.value)
+      shouldShowSnackbar.value = true
 }
 </script>
 
 <template>
-  <v-snackbar color="primary" v-model="shouldShowSnackbar">
-    Link created at <a v-if="link" :href="`/to/${link}`">{{ link }}</a>!
+  <v-snackbar v-model="shouldShowSnackbar">
+    Link created at <a v-if="link" :href="`/to/${link}`">{{ fullUrl }}</a>!
     
     <template v-slot:actions>
-      <v-btn color="secondary" icon="mdi-content-copy" @click="async () => await toClipboard(getUrl(`to/${link}`))" />
-      <v-btn color="secondary" icon="mdi-close-box" @click="() => shouldShowSnackbar = false" />
+      <v-btn icon="mdi-content-copy" @click="async () => await toClipboard(fullUrl)" />
+      <v-btn icon="mdi-close-box" @click="() => shouldShowSnackbar = false" />
     </template>
   </v-snackbar>
   <v-form>
@@ -71,7 +78,7 @@ function getUrl(url?: string): string {
           <v-text-field
             hide-details="auto"
             label="Url to Shorten"
-            v-model="formData.redirectToUrl"
+            v-model="formData.url"
             variant="solo"
           />
         </v-col>
@@ -83,8 +90,8 @@ function getUrl(url?: string): string {
             hide-details="auto"
             class="mx-2"
             variant="solo"
-            :disabled="formData.isNeverExpires"
-            v-model="expiresIn"
+            :disabled="formData.neverExpires"
+            v-model="formData.timeValue"
           />
         </v-col>
         <v-col cols="3">
@@ -92,9 +99,9 @@ function getUrl(url?: string): string {
             hide-details="auto"
             class="mx-2"
             variant="solo"
-            :disabled="formData.isNeverExpires"
+            :disabled="formData.neverExpires"
             :items="timeIncrements"
-            v-model="expiresInIncrement"
+            v-model="formData.timeInterval"
             label="Time Increment"
             item-title="display"
             item-value="increment"
@@ -104,7 +111,7 @@ function getUrl(url?: string): string {
           <v-checkbox
             hide-details="auto"
             class="mx-2"
-            v-model="formData.isNeverExpires"
+            v-model="formData.neverExpires"
             label="Never Expires"
           />
         </v-col>
@@ -116,4 +123,5 @@ function getUrl(url?: string): string {
   </v-form>
 </template>
 
-<style scoped></style>
+<style scoped>
+</style>
