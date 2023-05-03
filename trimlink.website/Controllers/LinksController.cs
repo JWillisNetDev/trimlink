@@ -28,7 +28,7 @@ public sealed class LinksController : Controller
             _linkService.GenerateShortLink(linkCreate.RedirectToUrl, out int _) :
             _linkService.GenerateShortLink(linkCreate.RedirectToUrl, linkCreate.Duration, out int _);
 
-        _logger.LogInformation("Generated {token} redirect to {url}", token, linkCreate.RedirectToUrl);
+        _logger.LogInformation("Generated {Token} redirects to {Url}", token, linkCreate.RedirectToUrl);
 
         return Created($"/api/links/{token}", token);
     }
