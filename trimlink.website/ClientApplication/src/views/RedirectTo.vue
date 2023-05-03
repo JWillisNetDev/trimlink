@@ -2,6 +2,7 @@
 import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import LinkService from '@/services/LinkService'
+import DancingEllipses from "@/components/DancingEllipses.vue";
 
 const route = useRoute()
 
@@ -29,10 +30,14 @@ onMounted(async () => {
 
 <template>
   <div>
-    <h1>{{ greeting }}</h1>
-    <p>Not being redirected? <a :href="link">Try clicking here.</a></p>
+    <div v-if="link">
+      <h1>{{ greeting }}</h1>
+      <p>Not being redirected? <a :href="link">Try clicking here.</a></p>
+    </div>
+    <dancing-ellipses v-else />
   </div>
 </template>
 
 <style scoped>
+
 </style>

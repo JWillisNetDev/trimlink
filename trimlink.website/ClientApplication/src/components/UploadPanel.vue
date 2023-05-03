@@ -64,7 +64,8 @@ async function submit() {
 
 <template>
   <v-snackbar v-model="shouldShowSnackbar">
-    Link created at <a v-if="link" :href="`/to/${link}`">{{ fullUrl }}</a>!
+    Link created at <a v-if="link" :href="`/to/${link}`">{{ fullUrl }}!</a>
+    
     
     <template v-slot:actions>
       <v-btn icon="mdi-content-copy" @click="async () => await toClipboard(fullUrl)" />
@@ -124,4 +125,34 @@ async function submit() {
 </template>
 
 <style scoped>
+.ellipses {
+    position: relative;
+}
+
+.ellipses > span {
+    display: inline-block;
+    margin-left: 5px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: black;
+    animation: bounce 1s infinite;
+}
+
+.dot-2 {
+    animation-delay: 0.2s;
+}
+
+.dot-3 {
+    animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+    0%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+}
 </style>
