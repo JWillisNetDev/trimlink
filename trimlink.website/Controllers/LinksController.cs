@@ -21,15 +21,11 @@ public sealed class LinksController : Controller
     }
 
     [HttpPost(Name = "CreateLink")]
-    [ProducesResponseType(typeof(LinkGetDto), StatusCodes.Status201Created)]
-    public IActionResult CreateLink([FromBody] LinkCreateDto linkCreate)
+    [ProducesResponseType(typeof(string), StatusCodes.Status201Created)]
+    public async Task<IActionResult> CreateLink([FromBody] LinkCreateDto linkCreate)
     {
-        string token = linkCreate.IsNeverExpires ?
-            _linkService.GenerateShortLink(linkCreate.RedirectToUrl, out int _) :
-            _linkService.GenerateShortLink(linkCreate.RedirectToUrl, linkCreate.Duration, out int _);
-
+        string token = await _linkService.GenerateShortLink(linkCreate.RedirectToUrl, linkCreate.Duration);
         _logger.LogInformation("Generated {Token} redirects to {Url}", token, linkCreate.RedirectToUrl);
-
         return Created($"/api/links/{token}", token);
     }
 

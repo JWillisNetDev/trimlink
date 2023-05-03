@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.ComponentModel;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -21,14 +22,15 @@ public class Link
     public DateTime UtcDateCreated { get; set; }
 
     /// <summary>
-    /// DateTime when this <see cref="Link"/> is to be marked for deletion. This should be set to <see cref="DateTime.MaxValue"/> if this <see cref="Link"/> does not expire.
+    /// DateTime when this <see cref="Link"/> is to be marked for deletion. This should be set to null if it does not expire.
     /// </summary>
-    public DateTime UtcDateExpires { get; set; }
+    [ReadOnly(true)]
+    public DateTime? UtcDateExpires { get; set; }
 
     /// <summary>
-    /// Set to true if this link is meant to never expire.
+    /// Getter only. True if this link never expires. Checks if <see cref="UtcDateExpires"/> is null.
     /// </summary>
-    public bool IsNeverExpires { get; set; }
+    public bool IsNeverExpires => UtcDateExpires is null;
 
     /// <summary>
     /// Set to true once this <see cref="Link"/> is marked for deletion.

@@ -4,7 +4,7 @@ import UploadPanel from '@/components/UploadPanel.vue'
 
 <template>
   <div>
-    <UploadPanel />
+    <upload-panel />
   </div>
 </template>
 

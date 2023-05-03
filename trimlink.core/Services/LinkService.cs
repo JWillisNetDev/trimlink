@@ -34,7 +34,7 @@ public class LinkService : ILinkService, IDisposable
     {
     }
 
-    private Link CreateLink(string toUrl, bool isNeverExpires, TimeSpan expiresAfter)
+    private Link CreateLink(string toUrl, TimeSpan? expiresAfter = null)
     {
         string token = _tokenGenerator.GenerateToken();
         DateTime now = DateTime.UtcNow;
@@ -43,15 +43,11 @@ public class LinkService : ILinkService, IDisposable
             RedirectToUrl = toUrl,
             Token = token,
             IsMarkedForDeletion = false,
-            IsNeverExpires = isNeverExpires,
             UtcDateCreated = now,
-            UtcDateExpires = isNeverExpires ? DateTime.MaxValue : now + expiresAfter,
+            UtcDateExpires = now + expiresAfter // This evaluates to 'null' if either side of expression is null! Nifty.
         };
         return link;
     }
-
-    private Link CreateLink(string toUrl)
-        => CreateLink(toUrl, true, TimeSpan.Zero);
 
     private void HandleLinkValidation(string toUrl)
     {
@@ -67,29 +63,14 @@ public class LinkService : ILinkService, IDisposable
         }
     }
 
-    public string GenerateShortLink(string toUrl, out int id)
+    public async Task<string> GenerateShortLink(string toUrl, TimeSpan? expiresAfter = null)
     {
         HandleLinkValidation(toUrl);
 
-        Link link = CreateLink(toUrl);
+        Link link = CreateLink(toUrl, expiresAfter);
+        await _context.Links.AddAsync(link);
+        await _context.SaveChangesAsync();
 
-        _context.Links.Add(link);
-        _context.SaveChanges();
-
-        id = link.Id;
-        return link.Token;
-    }
-
-    public string GenerateShortLink(string toUrl, TimeSpan expiresAfter, out int id)
-    {
-        HandleLinkValidation(toUrl);
-
-        Link link = CreateLink(toUrl, false, expiresAfter);
-
-        _context.Links.Add(link);
-        _context.SaveChanges();
-
-        id = link.Id;
         return link.Token;
     }
 

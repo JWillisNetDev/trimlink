@@ -12,12 +12,11 @@ internal static class MockLinkService
     {
         Mock<ILinkService> mock = new();
 
-        int expectedId = 0;
-        mock.Setup(ls => ls.GenerateShortLink(It.IsAny<string>(), out expectedId))
-            .Returns(ExpectedToken);
+        mock.Setup(ls => ls.GenerateShortLink(It.IsAny<string>(), null))
+            .Returns(Task.FromResult(ExpectedToken));
 
-        mock.Setup(ls => ls.GenerateShortLink(It.IsAny<string>(), It.IsAny<TimeSpan>(), out expectedId))
-            .Returns(ExpectedToken);
+        mock.Setup(ls => ls.GenerateShortLink(It.IsAny<string>(), It.IsAny<TimeSpan>()))
+            .Returns(Task.FromResult(ExpectedToken));
 
         mock.Setup(ls => ls.GetLongUrlById(It.IsAny<int>()))
             .Returns(ExpectedLongUrl);

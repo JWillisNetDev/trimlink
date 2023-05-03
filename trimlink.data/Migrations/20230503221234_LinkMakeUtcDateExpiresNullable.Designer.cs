@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using trimlink.data;
 
@@ -11,9 +12,11 @@ using trimlink.data;
 namespace trimlink.data.Migrations
 {
     [DbContext(typeof(TrimLinkDbContext))]
-    partial class TrimLinkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230503221234_LinkMakeUtcDateExpiresNullable")]
+    partial class LinkMakeUtcDateExpiresNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

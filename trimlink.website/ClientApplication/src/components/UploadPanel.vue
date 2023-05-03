@@ -1,75 +1,74 @@
 <script setup lang="ts">
-import {reactive, ref, computed} from 'vue'
-import {TimeIncrement} from '@/types/TimeIncrement'
-import {Duration} from 'ts-luxon'
+import { reactive, ref, computed } from 'vue'
 import LinkService from '@/services/LinkService'
 import useClipboard from 'vue-clipboard3'
 
-const { toClipboard } = useClipboard() 
+const { toClipboard } = useClipboard()
 
-const timeIncrements = [
-  TimeIncrement.Minutes,
-  TimeIncrement.Hours,
-  TimeIncrement.Days,
-  TimeIncrement.Weeks
+enum TimeInterval {
+  Minutes = 'minute(s)',
+  Hours = 'hour(s)',
+  Days = 'day(s)',
+  Weeks = 'week(s)'
+}
+
+const intervals: TimeInterval[] = [
+    TimeInterval.Minutes,
+    TimeInterval.Hours,
+    TimeInterval.Days,
+    TimeInterval.Weeks
 ]
 
 interface Form {
-    url: string,
-    timeValue: number,
-    timeInterval: TimeIncrement,
-    neverExpires: boolean
+  url: string
+  timeValue: number
+  timeInterval: TimeInterval
+  neverExpires: boolean
 }
 
 const formData = reactive<Form>({
-    url: '',
-    timeValue: 0,
-    timeInterval: TimeIncrement.Minutes,
-    neverExpires: false
+  url: '',
+  timeValue: 0,
+  timeInterval: TimeInterval.Minutes,
+  neverExpires: false
 })
 
-const expiresIn = ref<number>(0)
-const expiresInIncrement = ref<TimeIncrement>(TimeIncrement.Minutes)
 const shouldShowSnackbar = ref<boolean>(false)
 const link = ref<string>()
 const fullUrl = computed(() => `${window.location.origin}/to/${link.value}`)
 
 async function submit() {
-    if (formData.neverExpires) {
-        link.value = await LinkService.createLink(formData.url) ?? ''
+  if (formData.neverExpires) {
+    link.value = (await LinkService.createLink(formData.url)) ?? ''
+  } else {
+    let duration: string = ''
+    switch (formData.timeInterval) {
+      case TimeInterval.Minutes:
+        duration = `0.00:${formData.timeValue}:00.000`
+        break
+      case TimeInterval.Hours:
+        duration = `0.${formData.timeValue}:00:00.000`
+        break
+      case TimeInterval.Days:
+        duration = `${formData.timeValue}.00:00:00.000`
+        break
+      case TimeInterval.Weeks:
+        duration = `${formData.timeValue * 7}.00:00:00.000`
+        break
     }
-    else {
-        let duration: string = '';
-        const format = 'ddd.hh:mm:ss.SSS'
-        switch (formData.timeInterval) {
-            case TimeIncrement.Minutes:
-                duration = `0.00:${formData.timeValue}:00.000`
-                break
-            case TimeIncrement.Hours:
-                duration = `0.${formData.timeValue}:00:00.000`
-                break
-            case TimeIncrement.Days:
-                duration = `${formData.timeValue}.00:00:00.000`
-                break
-            case TimeIncrement.Weeks:
-                duration = `${formData.timeValue * 7}.00:00:00.000`
-                break
-        }
-        link.value = await LinkService.createLinkExpires(formData.url, duration) ?? ''
-    }
-    if (link.value)
-      shouldShowSnackbar.value = true
+    link.value = (await LinkService.createLink(formData.url, duration)) ?? ''
+  }
+  if (link.value) shouldShowSnackbar.value = true
 }
 </script>
 
 <template>
   <v-snackbar v-model="shouldShowSnackbar">
     Link created at <a v-if="link" :href="`/to/${link}`">{{ fullUrl }}!</a>
-    
-    
+
     <template v-slot:actions>
       <v-btn icon="mdi-content-copy" @click="async () => await toClipboard(fullUrl)" />
-      <v-btn icon="mdi-close-box" @click="() => shouldShowSnackbar = false" />
+      <v-btn icon="mdi-close-box" @click="() => (shouldShowSnackbar = false)" />
     </template>
   </v-snackbar>
   <v-form>
@@ -101,11 +100,9 @@ async function submit() {
             class="mx-2"
             variant="solo"
             :disabled="formData.neverExpires"
-            :items="timeIncrements"
+            :items="intervals"
             v-model="formData.timeInterval"
             label="Time Increment"
-            item-title="display"
-            item-value="increment"
           />
         </v-col>
         <v-col cols="2">
@@ -124,35 +121,4 @@ async function submit() {
   </v-form>
 </template>
 
-<style scoped>
-.ellipses {
-    position: relative;
-}
-
-.ellipses > span {
-    display: inline-block;
-    margin-left: 5px;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background-color: black;
-    animation: bounce 1s infinite;
-}
-
-.dot-2 {
-    animation-delay: 0.2s;
-}
-
-.dot-3 {
-    animation-delay: 0.4s;
-}
-
-@keyframes bounce {
-    0%, 80%, 100% {
-        transform: translateY(0);
-    }
-    40% {
-        transform: translateY(-10px);
-    }
-}
-</style>
+<style scoped></style>

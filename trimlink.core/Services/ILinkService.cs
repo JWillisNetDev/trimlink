@@ -2,8 +2,7 @@
 
 public interface ILinkService
 {
-    string GenerateShortLink(string toUrl, out int id);
-    string GenerateShortLink(string toUrl, TimeSpan expiresAfter, out int id);
+    Task<string> GenerateShortLink(string toUrl, TimeSpan? expiresAfter = null);
 
     string? GetLongUrlById(int id);
     string? GetLongUrlByToken(string token);

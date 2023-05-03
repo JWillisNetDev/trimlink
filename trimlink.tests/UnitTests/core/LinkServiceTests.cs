@@ -36,7 +36,6 @@ public class LinkServiceTests
                 Id = 0,
                 UtcDateCreated = DateTime.Parse("2023-03-26 12:00:00.000"),
                 UtcDateExpires = DateTime.Parse("2024-03-26 12:00:00.000"),
-                IsNeverExpires = false,
                 IsMarkedForDeletion = false,
                 Token = "UZuMieEQHEha",
                 RedirectToUrl = @"https://www.google.com/"
@@ -45,8 +44,7 @@ public class LinkServiceTests
             {
                 Id = 1,
                 UtcDateCreated = DateTime.Parse("2023-10-10 12:00:00.000"),
-                UtcDateExpires = DateTime.MaxValue,
-                IsNeverExpires = true,
+                UtcDateExpires = null,
                 IsMarkedForDeletion = false,
                 Token = "sVFwysRodYWB",
                 RedirectToUrl = @"https://www.youtube.com/"
@@ -66,32 +64,30 @@ public class LinkServiceTests
     }
 
     [Test]
-    public void GenerateShortLink_GivenNoExpiration_ReturnsToken()
+    public async Task GenerateShortLink_GivenNoExpiration_ReturnsToken()
     {
         const string expectedToken = TestTokenGenerator.ExpectedToken;
         const string toUrl = "https://www.google.com/";
 
-        string actualToken = LinkService.GenerateShortLink(toUrl, out int actualId);
+        string actualToken = await LinkService.GenerateShortLink(toUrl);
 
         Assert.Multiple(() =>
         {
-            Assert.That(actualId, Is.AtLeast(0));
             Assert.That(actualToken, Is.Not.Null.Or.Empty);
             Assert.That(actualToken, Is.EqualTo(expectedToken));
         });
     }
 
     [Test]
-    public void GenerateShortLink_GivenExpiration_ReturnsToken()
+    public async Task GenerateShortLink_GivenExpiration_ReturnsToken()
     {
         const string expectedToken = TestTokenGenerator.ExpectedToken;
         const string toUrl = "https://www.google.com/";
         TimeSpan expiresAfter = TimeSpan.FromDays(1);
 
-        string actualToken = LinkService.GenerateShortLink(toUrl, expiresAfter, out int actualId);
+        string actualToken = await LinkService.GenerateShortLink(toUrl, expiresAfter);
         
         Assert.Multiple(() => {
-            Assert.That(actualId, Is.AtLeast(0));
             Assert.That(actualToken, Is.Not.Null.Or.Empty);
             Assert.That(actualToken, Is.EqualTo(expectedToken));
         });
@@ -100,43 +96,34 @@ public class LinkServiceTests
     [Test]
     public void GenerateShortLink_GivenInvalidLink_ThrowsArgumentException()
     {
-        const int expectedId = -1;
         const string url = "some malformed url";
-        int actualId = expectedId;
 
-        Assert.Throws<ArgumentException>(() =>
+        Assert.ThrowsAsync<ArgumentException>(async () =>
         {
-            LinkService.GenerateShortLink(url, out actualId);
+            await LinkService.GenerateShortLink(url);
         });
-        Assert.That(actualId, Is.EqualTo(expectedId));
     }
 
     [Test]
     public void GenerateShortLink_GivenNullUrl_ThrowsArgumentNullException()
     {
-        const int expectedId = -1;
         const string url = null!;
-        int actualId = expectedId;
 
-        Assert.Throws<ArgumentNullException>(() =>
+        Assert.ThrowsAsync<ArgumentNullException>(async () =>
         {
-            LinkService.GenerateShortLink(url!, out actualId);
+            await LinkService.GenerateShortLink(url!);
         });
-        Assert.That(actualId, Is.EqualTo(expectedId));
     }
 
     [Test]
     public void GenerateShortLink_GivenEmptyUrl_ThrowsArgumentException()
     {
-        const int expectedId = -1;
         const string url = "";
-        int actualId = expectedId;
 
-        Assert.Throws<ArgumentException>(() =>
+        Assert.ThrowsAsync<ArgumentException>(async () =>
         {
-            LinkService.GenerateShortLink(url, out actualId);
+            await LinkService.GenerateShortLink(url);
         });
-        Assert.That(actualId, Is.EqualTo(expectedId));
     }
 
     [Test]
@@ -144,9 +131,9 @@ public class LinkServiceTests
     {
         const string url = "/this/is/relative";
 
-        Assert.Throws<ArgumentException>(() =>
+        Assert.ThrowsAsync<ArgumentException>(async () =>
         {
-            LinkService.GenerateShortLink(url, out int _);
+            await LinkService.GenerateShortLink(url);
         });
     }
 

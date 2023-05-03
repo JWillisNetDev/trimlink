@@ -41,16 +41,15 @@ public class LinksControllerTests
     }
 
     [Test]
-    public void LinksController_PostNewLink_ReturnsCreatedShortId()
+    public async Task LinksController_PostNewLink_ReturnsCreatedShortId()
     {
         LinkCreateDto linkCreate = new()
         {
             RedirectToUrl = "https://www.google.com/",
-            Duration = TimeSpan.FromHours(42),
-            IsNeverExpires = false,
+            Duration = TimeSpan.FromHours(42)
         };
 
-        ObjectResult? actual = _controller.CreateLink(linkCreate) as ObjectResult;
+        ObjectResult? actual = await _controller.CreateLink(linkCreate) as ObjectResult;
 
         Assert.That(actual, Is.Not.Null);
         Assert.That(actual, Is.AssignableFrom<CreatedResult>());
