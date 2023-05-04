@@ -19,10 +19,10 @@ internal static class MockLinkService
             .Returns(Task.FromResult(ExpectedToken));
 
         mock.Setup(ls => ls.GetLongUrlById(It.IsAny<int>()))
-            .Returns(ExpectedLongUrl);
+            .Returns(Task.FromResult<string?>(ExpectedLongUrl));
 
         mock.Setup(ls => ls.GetLongUrlByToken(It.IsAny<string>()))
-            .Returns(ExpectedLongUrl);
+            .Returns(Task.FromResult<string?>(ExpectedLongUrl));
 
         return mock;
     }

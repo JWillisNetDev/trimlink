@@ -138,87 +138,87 @@ public class LinkServiceTests
     }
 
     [Test]
-    public void GetLongUrlById_GivenValidId_ReturnsLongUrl()
+    public async Task GetLongUrlById_GivenValidId_ReturnsLongUrl()
     {
         const int id = 1;
         const string expectedUrl = "https://www.youtube.com/";
 
-        string? actualUrl = LinkService.GetLongUrlById(id);
+        string? actualUrl = await LinkService.GetLongUrlById(id);
 
         Assert.That(actualUrl, Is.Not.Null.Or.Empty);
         Assert.That(actualUrl, Is.EqualTo(expectedUrl));
     }
 
     [Test]
-    public void GetLongUrlById_GivenInvalidId_ReturnsNull()
+    public async Task GetLongUrlById_GivenInvalidId_ReturnsNull()
     {
         const int id = 42_1337;
 
-        string? actualUrl = LinkService.GetLongUrlById(id);
+        string? actualUrl = await LinkService.GetLongUrlById(id);
 
         Assert.That(actualUrl, Is.Null);
     }
 
     [Test]
-    public void GetLongUrlByToken_GivenValidToken_ReturnsLongUrl()
+    public async Task GetLongUrlByToken_GivenValidToken_ReturnsLongUrl()
     {
         const string token = "UZuMieEQHEha";
         const string expectedUrl = "https://www.google.com/";
 
-        string? actualUrl = LinkService.GetLongUrlByToken(token);
+        string? actualUrl = await LinkService.GetLongUrlByToken(token);
 
         Assert.That(actualUrl, Is.Not.Null.Or.Empty);
         Assert.That(actualUrl, Is.EqualTo(expectedUrl));
     }
 
     [Test]
-    public void GetLongUrlByToken_GivenInvalidToken_ReturnsNull()
+    public async Task GetLongUrlByToken_GivenInvalidToken_ReturnsNull()
     {
         const string token = "hello, world!";
 
-        string? actualUrl = LinkService.GetLongUrlByToken(token);
+        string? actualUrl = await LinkService.GetLongUrlByToken(token);
 
         Assert.That(actualUrl, Is.Null);
     }
 
     [Test]
-    public void GetLinkDetailsById_GivenValidId_ReturnsLinkDetails()
+    public async Task GetLinkDetailsById_GivenValidId_ReturnsLinkDetails()
     {
         const int expectedId = 0;
 
-        LinkDetails? actual = LinkService.GetLinkDetailsById(expectedId);
+        LinkDetails? actual = await LinkService.GetLinkDetailsById(expectedId);
 
         Assert.That(actual, Is.Not.Null);
         Assert.That(actual?.Id, Is.EqualTo(expectedId));
     }
 
     [Test]
-    public void GetLinkDetailsById_GivenInvalidId_ReturnsNull()
+    public async Task GetLinkDetailsById_GivenInvalidId_ReturnsNull()
     {
         const int expectedId = 42;
 
-        LinkDetails? actual = LinkService.GetLinkDetailsById(expectedId);
+        LinkDetails? actual = await LinkService.GetLinkDetailsById(expectedId);
 
         Assert.That(actual, Is.Null);
     }
 
     [Test]
-    public void GetLinkDetailsByToken_GivenValidToken_ReturnsLinkDetails()
+    public async Task GetLinkDetailsByToken_GivenValidToken_ReturnsLinkDetails()
     {
         const string expectedToken = "UZuMieEQHEha";
 
-        LinkDetails? actual = LinkService.GetLinkDetailsByToken(expectedToken);
+        LinkDetails? actual = await LinkService.GetLinkDetailsByToken(expectedToken);
 
         Assert.That(actual, Is.Not.Null);
         Assert.That(actual?.Token, Is.EqualTo(expectedToken));
     }
 
     [Test]
-    public void GetLinkDetailsByToken_GivenInvalidToken_ReturnsNull()
+    public async Task GetLinkDetailsByToken_GivenInvalidToken_ReturnsNull()
     {
         const string expectedToken = "inigo montoya";
 
-        LinkDetails? actual = LinkService.GetLinkDetailsByToken(expectedToken);
+        LinkDetails? actual = await LinkService.GetLinkDetailsByToken(expectedToken);
 
         Assert.That(actual, Is.Null);
     }

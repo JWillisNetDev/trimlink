@@ -9,11 +9,11 @@ internal static class MockDbSet
         where TEntity : class
     {
         IQueryable<TEntity> queryable = data.AsQueryable();
-
         Mock<DbSet<TEntity>> mock = new();
+        
         mock.As<IQueryable<TEntity>>()
             .Setup(set => set.Provider)
-            .Returns(queryable.Provider);
+            .Returns(new TestAsyncQueryProvider<TEntity>(queryable.Provider));
 
         mock.As<IQueryable<TEntity>>()
             .Setup(set => set.Expression)
@@ -26,6 +26,10 @@ internal static class MockDbSet
         mock.As<IQueryable<TEntity>>()
             .Setup(set => set.GetEnumerator())
             .Returns(() => queryable.GetEnumerator());
+
+        mock.As<IAsyncEnumerable<TEntity>>()
+            .Setup(set => set.GetAsyncEnumerator( It.IsAny<CancellationToken>()))
+            .Returns(new TestAsyncEnumerator<TEntity>(data.GetEnumerator()));
 
         return mock;
     }

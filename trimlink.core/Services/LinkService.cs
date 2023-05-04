@@ -5,7 +5,7 @@ using trimlink.core.Records;
 
 namespace trimlink.core.Services;
 
-public class LinkService : ILinkService, IDisposable
+public class LinkService : ILinkService, IAsyncDisposable, IDisposable
 {
     private readonly TrimLinkDbContext _context;
     private readonly ITokenGenerator _tokenGenerator;
@@ -74,48 +74,68 @@ public class LinkService : ILinkService, IDisposable
         return link.Token;
     }
 
-    public string? GetLongUrlById(int id)
+    public async Task<string?> GetLongUrlById(int id)
     {
-        Link? found = _context.Links
+        Link? found = await _context.Links
             .AsNoTracking()
-            .SingleOrDefault(link => link.Id == id);
-
+            .SingleOrDefaultAsync(link => link.Id == id);
         return found?.RedirectToUrl;
     }
 
-    public string? GetLongUrlByToken(string token)
+    public async Task<string?> GetLongUrlByToken(string token)
     {
-        Link? found = _context.Links
+        Link? found = await _context.Links
             .AsNoTracking()
-            .SingleOrDefault(link => link.Token == token);
-
+            .SingleOrDefaultAsync(link => link.Token == token);
         return found?.RedirectToUrl;
     }
 
-    public LinkDetails? GetLinkDetailsById(int id)
+    public async Task<LinkDetails?> GetLinkDetailsById(int id)
     {
-        Link? found = _context.Links
+        Link? found = await _context.Links
             .AsNoTracking()
-            .SingleOrDefault(link => link.Id == id);
+            .SingleOrDefaultAsync(link => link.Id == id);
 
         return found is null ?
             null :
             new LinkDetails(found);
     }
 
-    public LinkDetails? GetLinkDetailsByToken(string token)
+    public async Task<LinkDetails?> GetLinkDetailsByToken(string token)
     {
-        Link? found = _context.Links
+        Link? found = await _context.Links
             .AsNoTracking()
-            .SingleOrDefault(link => link.Token == token);
-
+            .SingleOrDefaultAsync(link => link.Token == token);
         return found is null ?
             null :
             new LinkDetails(found);
     }
+    
+    #region Implements IAsyncDisposable
+    public async ValueTask DisposeAsync()
+    {
+        await DisposeAsyncCore().ConfigureAwait(false);
+        
+        Dispose(disposing: false);
+        GC.SuppressFinalize(this);
+    }
 
+    protected virtual async ValueTask DisposeAsyncCore()
+    {
+        await _context.DisposeAsync().ConfigureAwait(false);
+    }
+    
+    #endregion
     #region Implements IDisposable
     private bool _disposed;
+    
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+    
     protected virtual void Dispose(bool disposing)
     {
         if (_disposed)
@@ -126,13 +146,6 @@ public class LinkService : ILinkService, IDisposable
             _context.Dispose();
             _disposed = true;
         }
-    }
-
-    public void Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
     }
     #endregion
 }

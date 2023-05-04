@@ -32,9 +32,9 @@ public sealed class LinksController : Controller
     [HttpGet("{token}", Name = "GetLinkRedirect")]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-    public IActionResult GetLinkRedirect([FromRoute] string token)
+    public async Task<IActionResult> GetLinkRedirect([FromRoute] string token)
     {
-        string? toUrl = _linkService.GetLongUrlByToken(token);
+        string? toUrl = await _linkService.GetLongUrlByToken(token);
 
         return toUrl is null ?
             NotFound(token) :
@@ -44,9 +44,9 @@ public sealed class LinksController : Controller
     [HttpGet("{token}/details", Name = "LinkDetails")]
     [ProducesResponseType(typeof(LinkGetDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-    public IActionResult GetLinkDetails([FromRoute] string token)
+    public async Task<IActionResult> GetLinkDetails([FromRoute] string token)
     {
-        LinkDetails? link = _linkService.GetLinkDetailsByToken(token);
+        LinkDetails? link = await _linkService.GetLinkDetailsByToken(token);
 
         if (link is null)
             return NotFound(token);
