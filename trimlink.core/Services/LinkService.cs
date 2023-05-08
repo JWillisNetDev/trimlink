@@ -7,7 +7,7 @@ using trimlink.core.Records;
 
 namespace trimlink.core.Services;
 
-public class LinkService : ILinkService, IAsyncDisposable, IDisposable
+public class LinkService : ILinkService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
@@ -22,6 +22,7 @@ public class LinkService : ILinkService, IAsyncDisposable, IDisposable
     )
     {
         _unitOfWork = unitOfWork;
+        
         _dateTimeProvider = dateTimeProvider ?? new SystemDateTimeProvider();
         _tokenGenerator = tokenGenerator ?? new TokenGenerator();
         _linkValidator = linkValidator ?? new LinkValidator();
@@ -61,34 +62,27 @@ public class LinkService : ILinkService, IAsyncDisposable, IDisposable
         HandleLinkValidation(toUrl);
 
         Link link = CreateLink(toUrl, expiresAfter);
-        await _context.Links.AddAsync(link);
-        await _context.SaveChangesAsync();
+        await _unitOfWork.Links.AddAsync(link);
+        await _unitOfWork.Save();
 
         return link.Token;
     }
 
     public async Task<string?> GetLongUrlById(int id)
     {
-        Link? found = await _context.Links
-            .AsNoTracking()
-            .SingleOrDefaultAsync(link => link.Id == id);
+        Link? found = await _unitOfWork.Links.GetAsync(id);
         return found?.RedirectToUrl;
     }
 
     public async Task<string?> GetLongUrlByToken(string token)
     {
-        Link? found = await _context.Links
-            .AsNoTracking()
-            .SingleOrDefaultAsync(link => link.Token == token);
+        Link? found = await _unitOfWork.Links.FindAsync(link => link.Token == token);
         return found?.RedirectToUrl;
     }
 
     public async Task<LinkDetails?> GetLinkDetailsById(int id)
     {
-        Link? found = await _context.Links
-            .AsNoTracking()
-            .SingleOrDefaultAsync(link => link.Id == id);
-
+        Link? found = await _unitOfWork.Links.GetAsync(id);
         return found is null ?
             null :
             new LinkDetails(found);
@@ -96,49 +90,9 @@ public class LinkService : ILinkService, IAsyncDisposable, IDisposable
 
     public async Task<LinkDetails?> GetLinkDetailsByToken(string token)
     {
-        Link? found = await _context.Links
-            .AsNoTracking()
-            .SingleOrDefaultAsync(link => link.Token == token);
+        Link? found = await _unitOfWork.Links.FindAsync(link => link.Token == token);
         return found is null ?
             null :
             new LinkDetails(found);
     }
-    
-    #region Implements IAsyncDisposable
-    public async ValueTask DisposeAsync()
-    {
-        await DisposeAsyncCore().ConfigureAwait(false);
-        
-        Dispose(disposing: false);
-        GC.SuppressFinalize(this);
-    }
-
-    protected virtual async ValueTask DisposeAsyncCore()
-    {
-        await _context.DisposeAsync().ConfigureAwait(false);
-    }
-    
-    #endregion
-    #region Implements IDisposable
-    private bool _disposed;
-    
-    public void Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
-    
-    protected virtual void Dispose(bool disposing)
-    {
-        if (_disposed)
-            return;
-
-        if (disposing)
-        {
-            _context.Dispose();
-            _disposed = true;
-        }
-    }
-    #endregion
 }

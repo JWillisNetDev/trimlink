@@ -2,11 +2,11 @@ namespace trimlink.core.Interfaces;
 
 public interface IUnitOfWorkFactory
 {
-    IUnitOfWork CreateUnitOfWork();
+    Task<IUnitOfWork> CreateUnitOfWork();
 }
 
-public interface IUnitOfWorkFactory<out TUnitOfWork>
+public interface IUnitOfWorkFactory<TUnitOfWork>
     where TUnitOfWork : IUnitOfWork
 {
-    TUnitOfWork CreateUnitOfWork();
+    Task<TUnitOfWork> CreateUnitOfWork();
 }

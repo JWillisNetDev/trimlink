@@ -4,6 +4,6 @@ namespace trimlink.core.Interfaces;
 
 public interface IUnitOfWork
 {
-    IRepository<Link> Links { get; }
-    ValueTask Save();
+    IRepository<Link, int> Links { get; }
+    Task Save();
 }

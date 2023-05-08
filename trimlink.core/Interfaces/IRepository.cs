@@ -1,18 +1,13 @@
 namespace trimlink.core.Interfaces;
 
-public interface IRepository<TEntity>
+public interface IRepository<TEntity, in TKey>
     where TEntity : class
 {
-    /* Getting */
-    ValueTask<TEntity> Get(object id);
-    IAsyncEnumerable<TEntity> GetAll();
-    
-    /* Predicated lookups */
-    ValueTask<TEntity> Find(Func<TEntity, bool> predicate);
-    IAsyncEnumerable<TEntity> Filter(Func<TEntity, bool> predicate);
-
-    /* Modifying */
-    ValueTask Add(TEntity entity);
-    ValueTask Remove(TEntity entity);
-    ValueTask Update(TEntity entity);
+    Task<TEntity?> GetAsync(TKey id);
+    IAsyncEnumerable<TEntity> GetAllAsync();
+    Task<TEntity?> FindAsync(Func<TEntity, bool> predicate);
+    IAsyncEnumerable<TEntity> FilterAsync(Func<TEntity, bool> predicate);
+    Task AddAsync(TEntity entity);
+    Task RemoveAsync(TEntity entity);
+    Task UpdateAsync(TEntity entity);
 }
