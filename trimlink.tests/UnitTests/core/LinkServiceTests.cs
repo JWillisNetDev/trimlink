@@ -1,5 +1,6 @@
 ﻿using Moq;
 using trimlink.core;
+using trimlink.core.Interfaces;
 using trimlink.core.Records;
 using trimlink.core.Services;
 using trimlink.data;

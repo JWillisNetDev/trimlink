@@ -1,4 +1,5 @@
 ﻿using trimlink.core;
+using trimlink.core.Interfaces;
 
 namespace trimlink.tests;
 

@@ -4,7 +4,7 @@ using trimlink.core.Interfaces;
 
 namespace trimlink.core;
 
-public class DefaultTokenGenerator : ITokenGenerator
+public class TokenGenerator : ITokenGenerator
 {
     private GenerationOptions GetOptions()
         => new(useNumbers: UseNumbers, useSpecialCharacters: UseSpecialCharacters, length: Length);
@@ -13,7 +13,7 @@ public class DefaultTokenGenerator : ITokenGenerator
     public bool UseSpecialCharacters { get; set; }
     public int Length { get; set; }
 
-    public DefaultTokenGenerator(bool useNumbers = true, bool useSpecialCharacters = false, int length = 12)
+    public TokenGenerator(bool useNumbers = true, bool useSpecialCharacters = false, int length = 12)
     {
         UseNumbers = useNumbers;
         UseSpecialCharacters = useSpecialCharacters;

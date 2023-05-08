@@ -2,7 +2,7 @@
 
 namespace trimlink.core;
 
-public class DefaultLinkValidator : ILinkValidator
+public class LinkValidator : ILinkValidator
 {
     public LinkValidationResult Validate(string url)
     {

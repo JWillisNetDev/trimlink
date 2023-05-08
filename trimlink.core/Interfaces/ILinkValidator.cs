@@ -1,4 +1,4 @@
-﻿namespace trimlink.core;
+﻿namespace trimlink.core.Interfaces;
 
 public interface ILinkValidator
 {

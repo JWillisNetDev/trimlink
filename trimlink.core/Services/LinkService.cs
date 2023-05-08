@@ -1,37 +1,30 @@
-﻿using trimlink.data;
+﻿using System.Diagnostics.CodeAnalysis;
+using trimlink.data;
 using trimlink.data.Models;
 using Microsoft.EntityFrameworkCore;
+using trimlink.core.Interfaces;
 using trimlink.core.Records;
 
 namespace trimlink.core.Services;
 
 public class LinkService : ILinkService, IAsyncDisposable, IDisposable
 {
-    private readonly TrimLinkDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ITokenGenerator _tokenGenerator;
     private readonly ILinkValidator _linkValidator;
 
     public LinkService(
-        TrimLinkDbContext context,
-        ITokenGenerator tokenGenerator,
-        ILinkValidator linkValidator
+        IUnitOfWork unitOfWork,
+        [AllowNull] IDateTimeProvider? dateTimeProvider = null,
+        [AllowNull] ITokenGenerator? tokenGenerator = null,
+        [AllowNull] ILinkValidator? linkValidator = null
     )
     {
-        _context = context;
-        _tokenGenerator = tokenGenerator;
-        _linkValidator = linkValidator;
-    }
-
-    public LinkService(TrimLinkDbContext context, ITokenGenerator tokenGenerator) : this(context, tokenGenerator, new DefaultLinkValidator())
-    {
-    }
-
-    public LinkService(TrimLinkDbContext context, ILinkValidator linkValidator) : this(context, new DefaultTokenGenerator(), linkValidator)
-    {
-    }
-
-    public LinkService(TrimLinkDbContext context) : this(context, new DefaultTokenGenerator(), new DefaultLinkValidator())
-    {
+        _unitOfWork = unitOfWork;
+        _dateTimeProvider = dateTimeProvider ?? new SystemDateTimeProvider();
+        _tokenGenerator = tokenGenerator ?? new TokenGenerator();
+        _linkValidator = linkValidator ?? new LinkValidator();
     }
 
     private Link CreateLink(string toUrl, TimeSpan? expiresAfter = null)

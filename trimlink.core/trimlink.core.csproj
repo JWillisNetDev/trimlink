@@ -8,7 +8,6 @@
 		<None Remove="Records\" />
 	</ItemGroup>
 	<ItemGroup>
-		<Folder Include="Services\" />
 		<Folder Include="Records\" />
 	</ItemGroup>
 	<ItemGroup>
