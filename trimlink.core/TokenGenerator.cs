@@ -1,5 +1,6 @@
 ﻿using shortid;
 using shortid.Configuration;
+using trimlink.core.Interfaces;
 
 namespace trimlink.core;
 
