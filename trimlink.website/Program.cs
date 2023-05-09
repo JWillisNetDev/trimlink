@@ -70,9 +70,6 @@ builder.Services.AddScoped<ILinkService, LinkService>(sp =>
     return new LinkService(unitOfWork);
 });
 
-// Add CORS
-builder.Services.AddCors();
-
 // TODO Add Authentication using jwt bearer authentication schema (maybe?)
 
 var app = builder.Build();
