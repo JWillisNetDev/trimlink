@@ -21,7 +21,6 @@ public class LinksControllerTests
     private IMapper _mapper;
     private Mock<ILogger<LinksController>> _mockLogger;
     private Mock<ILinkService> _mockLinkService;
-    private Mock<IUrlHelper> _mockUrlHelper;
     private LinksController _controller;
     
     #pragma warning restore CS8618
@@ -34,10 +33,8 @@ public class LinksControllerTests
 
         _mockLogger = new Mock<ILogger<LinksController>>();
         _mockLinkService = MockLinkService.GetMock();
-        _mockUrlHelper = MockUrlHelper.GetMock();
 
         _controller = new LinksController(_mockLogger.Object, _mapper, _mockLinkService.Object);
-        _controller.Url = _mockUrlHelper.Object;
     }
 
     [Test]
