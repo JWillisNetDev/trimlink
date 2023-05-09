@@ -3,6 +3,7 @@ using trimlink.website.Configuration;
 using Microsoft.EntityFrameworkCore;
 using trimlink.core.Services;
 using Serilog;
+using trimlink.website;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -62,7 +63,12 @@ builder.Services.AddDbContext<TrimLinkDbContext>(options =>
 });
 
 // Inject our LinkService
-builder.Services.AddScoped<ILinkService, LinkService>();
+builder.Services.AddScoped<ILinkService, LinkService>(sp =>
+{
+    TrimLinkDbContext dbContext = sp.GetRequiredService<TrimLinkDbContext>();
+    UnitOfWork unitOfWork = new UnitOfWork(dbContext);
+    return new LinkService(unitOfWork);
+});
 
 // Add CORS
 builder.Services.AddCors();

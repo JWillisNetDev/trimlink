@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq.Expressions;
 
 namespace trimlink.tests.Doubles;
 
@@ -22,14 +23,14 @@ internal class TestLinkRepository : IRepository<Link, int>
         return new TestAsyncEnumerable<Link>(_links.Values);
     }
 
-    public Task<Link?> FindAsync(Func<Link, bool> predicate)
+    public Task<Link?> FindAsync(Expression<Func<Link, bool>> predicate)
     {
-        return Task.FromResult(_links.Values.FirstOrDefault(predicate));
+        return Task.FromResult(_links.Values.FirstOrDefault(predicate.Compile()));
     }
 
-    public IAsyncEnumerable<Link> FilterAsync(Func<Link, bool> predicate)
+    public IAsyncEnumerable<Link> FilterAsync(Expression<Func<Link, bool>> predicate)
     {
-        return new TestAsyncEnumerable<Link>(_links.Values.Where(predicate));
+        return new TestAsyncEnumerable<Link>(_links.Values.Where(predicate.Compile()));
     }
 
     public Task AddAsync(Link link)

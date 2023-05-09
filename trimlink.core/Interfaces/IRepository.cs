@@ -1,3 +1,5 @@
+using System.Linq.Expressions;
+
 namespace trimlink.core.Interfaces;
 
 public interface IRepository<TEntity, in TKey>
@@ -5,8 +7,8 @@ public interface IRepository<TEntity, in TKey>
 {
     Task<TEntity?> GetAsync(TKey id);
     IAsyncEnumerable<TEntity> GetAllAsync();
-    Task<TEntity?> FindAsync(Func<TEntity, bool> predicate);
-    IAsyncEnumerable<TEntity> FilterAsync(Func<TEntity, bool> predicate);
+    Task<TEntity?> FindAsync(Expression<Func<TEntity, bool>> predicate);
+    IAsyncEnumerable<TEntity> FilterAsync(Expression<Func<TEntity, bool>> predicate);
     Task AddAsync(TEntity entity);
     Task RemoveAsync(TEntity entity);
     Task UpdateAsync(TEntity entity);
